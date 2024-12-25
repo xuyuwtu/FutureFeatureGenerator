@@ -1,0 +1,6 @@
+<Project>
+	<ItemGroup>
+		<None Remove="FutureFeature.txt" />
+		<AdditionalFiles Include="FutureFeature.txt" Condition="Exists('FutureFeature.txt')" />
+	</ItemGroup>
+</Project>

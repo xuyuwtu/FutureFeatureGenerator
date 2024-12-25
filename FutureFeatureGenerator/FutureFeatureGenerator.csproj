@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>10.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<!-- EmbeddedResource name -->
+		<RootNamespace></RootNamespace>
+		<DefineConstants>UseIIncrementalGenerator</DefineConstants>
+
+		<IsPackable>true</IsPackable>
+		<PackageTags>source generator;analyzers</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Description>a code generator for csharp language feature</Description>
+		<Authors>Xuyuwtu</Authors>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="System\**\*.cs" />
+		<EmbeddedResource Include="System\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="build\**" Pack="true" PackagePath="build\" />
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers\cs\" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.1" PrivateAssets="all" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Update="doc\README.md" Pack="true" PackagePath=".\" />
+	</ItemGroup>
+	
+</Project>
