@@ -11,17 +11,27 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace FutureFeatureGenerator;
 [Generator(LanguageNames.CSharp)]
+public class FeatureGenerator : 
 #if UseIIncrementalGenerator
-public class IncrementalGenerator : IIncrementalGenerator
+    IIncrementalGenerator
 #else
-public class SourceGenerator : ISourceGenerator
+    ISourceGenerator
 #endif
 {
     private static readonly StringCache condititonCache = new();
-    private const string FileName = "FutureFeature.txt";
+    private static readonly StringCache writeStringCache = new();
+    private readonly Dictionary<NodeBase, string> modifierCache = new(new NodeEqualityComparer());
+    public const string FileName = "FutureFeature.txt";
     private readonly NodeRoot Root = new();
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
+    private readonly string[] methodTypeFile = new string[] 
+    { 
+        $"System.IO.{nameof(Stream)}.cs",
+        $"System.{nameof(ArgumentException)}.cs",
+        $"System.{nameof(ArgumentNullException)}.cs",
+        $"System.{nameof(ArgumentOutOfRangeException)}.cs",
+    };
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
 #else
@@ -29,16 +39,17 @@ public class SourceGenerator : ISourceGenerator
 #endif
     {
 #if UseIIncrementalGenerator
-        context.RegisterImplementationSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Collect(), context.CompilationProvider), Execute);
+        context.RegisterSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect(), context.CompilationProvider.WithComparer(CompilationExternalReferencesEqualityComparer.Instance)
+            ), Execute);
 #endif
         var assembly = Assembly.GetExecutingAssembly();
         foreach (var resourceName in assembly.GetManifestResourceNames())
         {
             if (!resourceName.EndsWith(".cs"))
             {
-                throw new InvalidDataException("not end with '.cs'");
+                continue;
             }
-            var names = resourceName.Split(Utils.Separator);
+            var names = resourceName.Split(Utils.PointSeparator);
             var count = names.Length - 2;
             NodeCommon node = Root;
             for (int i = 0; i < count; i++)
@@ -53,7 +64,30 @@ public class SourceGenerator : ISourceGenerator
                     node = node.AddChild(name);
                 }
             }
-            node.AddChild(names[count], assembly.GetManifestResourceStream(resourceName)!);
+            if (methodTypeFile.Contains(resourceName))
+            {
+                var parent = new NodeClass(names[count], node);
+                node.AddChild(parent);
+                var stream = assembly.GetManifestResourceStream(resourceName);
+                var sr = new StreamReader(stream).GetWrapper();
+                var list = new List<(int startLine, string name)>();
+                var text = sr.ReadLine();
+                do
+                {
+                    var result = text.Substring("//".Length).Split(Utils.SpaceSeparator, StringSplitOptions.RemoveEmptyEntries);
+                    list.Add((int.Parse(result[0]), result[1]));
+                    text = sr.ReadLine();
+                } while (text.StartsWith("//"));
+                foreach (var pair in list)
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
+                    parent.AddChild(pair.name, stream, pair.startLine);
+                }
+            }
+            else
+            {
+                node.AddChild(names[count], assembly.GetManifestResourceStream(resourceName)!);
+            }
         }
         var hasDependencyLeaf = new List<TempNodeLeaf>();
         var tempAllLeaf = new List<NodeBase>();
@@ -231,11 +265,22 @@ public class SourceGenerator : ISourceGenerator
                 var leaf = (NodeLeaf)current;
                 leaf.Order = order++;
                 allLeaf.Add(leaf);
+                var isChecked = false;
+                for (int i = 0; i < leaf.Lines.Length; i++)
+                {
+                    if (!isChecked && leaf.Lines[i].StartsWith(Modifiers.Internal))
+                    {
+                        leaf.Lines[i] = leaf.Lines[i].Substring(Modifiers.Internal.Length).Trim();
+                        leaf.ModiferLineIndex = i;
+                        isChecked = true;
+                    }
+                    leaf.Lines[i] = writeStringCache.GetOrAdd(leaf.Lines[i]);
+                }
             }
         }
     }
 #if UseIIncrementalGenerator
-    private void Execute(SourceProductionContext context, (ImmutableArray<AdditionalText> additionalFiles, Compilation compilation) data)
+    private unsafe void Execute(SourceProductionContext context, (ImmutableArray<AdditionalText> additionalFiles, Compilation compilation) data)
 #else
     public void Execute(GeneratorExecutionContext context)
 #endif
@@ -259,23 +304,54 @@ public class SourceGenerator : ISourceGenerator
         {
             compilationLanguageVersion = LanguageVersion.Latest;
         }
-        var additionalText = additionalFiles.FirstOrDefault(x => FileName.Equals(Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase));
+        var additionalText = additionalFiles
+#if UseIIncrementalGenerator
+            .First();
+#else
+            .FirstOrDefault(x => string.Equals(FileName, Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase));
+#endif
         if (additionalText is null)
         {
             return;
         }
+#if DEBUG
+        string[] lines;
+        var sourceText = additionalText.GetText(default);
+        if (sourceText is null)
+        {
+            lines = File.ReadAllLines(additionalText.Path);
+        }
+        else 
+        {
+            var ms = new MemoryStream();
+            var sw = new StreamWriter(ms);
+            sourceText.Write(sw);
+            sw.Flush();
+            var tempLines = new List<string>();
+            ms.Seek(0, SeekOrigin.Begin);
+            var sr = new StreamReader(ms);
+            while (!sr.EndOfStream)
+            {
+                tempLines.Add(sr.ReadLine());
+            }
+            lines = tempLines.ToArray();
+        }
+#else
         var lines = File.ReadAllLines(additionalText.Path);
+#endif
         if (lines.Length == 0)
         {
             return;
         }
-        var stringWriter = new StringWriter();
-        var itw = new System.CodeDom.Compiler.IndentedTextWriter(stringWriter);
+        var memoryStream = new MemoryStream();
+        var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
         var additionalNodes = new List<NodeLeaf>();
         var depth = -1;
         var depthNode = new Stack<NodeCommon>();
         var depthNodeCount = new Stack<int>();
         depthNode.Push(Root);
+        modifierCache.Clear();
+        var defaultModifer = Modifiers.Internal;
         for (int i = 0; i < lines.Length; i++)
         {
             var line = lines[i];
@@ -286,6 +362,10 @@ public class SourceGenerator : ISourceGenerator
             if (i == 0 && line[0] == '*')
             {
                 additionalNodes.AddRange(allLeaf);
+                if (line.Contains(' ') && Array.IndexOf(Modifiers.All, line.Substring(line.IndexOf(' ')).Trim()) is var modIndex && modIndex != -1)
+                {
+                    defaultModifer = Modifiers.All[modIndex];
+                }
                 break;
             }
             if (line[0] == ';')
@@ -293,7 +373,8 @@ public class SourceGenerator : ISourceGenerator
                 continue;
             }
             var spaceLength = 0;
-            for (int j = 0; j < line.Length; j++)
+            int j = 0;
+            for (; j < line.Length; j++)
             {
                 if (line[j] is not ('\t' or ' '))
                 {
@@ -308,7 +389,7 @@ public class SourceGenerator : ISourceGenerator
                     spaceLength++;
                 }
             }
-            if (spaceLength % 4 != 0)
+            if (spaceLength % 4 != 0 || line[j] == ';')
             {
                 continue;
             }
@@ -333,7 +414,7 @@ public class SourceGenerator : ISourceGenerator
             }
             depthNodeCount.Push(depthNode.Count);
             line = line.Trim();
-            var nameList = line.Split(Utils.Separator, StringSplitOptions.RemoveEmptyEntries);
+            var nameList = line.Split(Utils.PointSeparator, StringSplitOptions.RemoveEmptyEntries);
             NodeBase? node = depthNode.Peek();
             if (node is null)
             {
@@ -342,20 +423,71 @@ public class SourceGenerator : ISourceGenerator
             var enumerator = ((IEnumerable<string>)nameList).GetEnumerator();
             while (enumerator.MoveNext())
             {
-                if (enumerator.Current == "*")
+                var spaceIndex = enumerator.Current.IndexOf(' ');
+                var checkName = enumerator.Current;
+                string? modifer = null;
+                if (spaceIndex != -1)
                 {
-                    additionalNodes.AddRange(((NodeCommon)node).Children.OfType<NodeLeaf>());
+                    if (Array.IndexOf(Modifiers.All, line.Substring(line.IndexOf(' ')).Trim()) is var modIndex && modIndex != -1)
+                    {
+                        modifer = Modifiers.All[modIndex];
+                    }
+                    checkName = checkName.Substring(0, spaceIndex);
+                }
+                if (checkName == "*")
+                {
+                    foreach (var nodeLeaf2 in ((NodeCommon)node).Children.OfType<NodeLeaf>())
+                    {
+                        additionalNodes.Add(nodeLeaf2);
+                        if (modifer is not null)
+                        {
+                            modifierCache[nodeLeaf2] = modifer;
+                            foreach (var dependency in nodeLeaf2.Dependencies)
+                            {
+                                if (dependency.Name.EndsWith(nameof(Attribute)))
+                                {
+                                    modifierCache[dependency] = modifer;
+                                }
+                            }
+                        }
+                    }
                     break;
                 }
-                node = node.FindNode(enumerator.Current);
+                node = node.FindNode(checkName);
                 if (node is null)
                 {
                     break;
                 }
-                if (node is NodeLeaf)
+                if (node is NodeLeaf nodeLeaf)
                 {
-                    additionalNodes.Add((NodeLeaf)node);
+                    additionalNodes.Add(nodeLeaf);
+                    if (modifer is not null)
+                    {
+                        modifierCache[nodeLeaf] = modifer;
+                        foreach (var dependency in nodeLeaf.Dependencies)
+                        {
+                            if (!dependency.Name.EndsWith(nameof(Attribute)))
+                            {
+                                modifierCache[dependency] = modifer;
+                            }
+                        }
+                    }
                     break;
+                }
+                if (modifer is not null)
+                {
+                    if (node.GetType() == typeof(NodeClass))
+                    {
+                        modifierCache[node] = modifer;
+                    }
+                    else
+                    {
+                        var common = (NodeCommon)node;
+                        foreach (var children in common.Children)
+                        {
+                            modifierCache[children] = modifer;
+                        }
+                    }
                 }
                 depthNode.Push((NodeCommon)node);
             }
@@ -385,7 +517,7 @@ public class SourceGenerator : ISourceGenerator
         var namespaceHandles = new StringHandle[namespaceTexts.Length];
         var notNodeTypeNamespaceStringHandle = new List<StringHandle>();
         var checkReference = true;
-        foreach (var reference in compilation.ExternalReferences)
+        foreach (MetadataReference reference in compilation.ExternalReferences)
         {
             if (!checkReference)
             {
@@ -429,13 +561,14 @@ public class SourceGenerator : ISourceGenerator
                         }
                         namespaceHandles[i] = typeDefinition.Namespace;
                     }
-                    var name = mtReader.GetString(typeDefinition.Name);
+                    var blobReader = mtReader.GetBlobReader(typeDefinition.Name);
+                    var name = new Span<byte>(blobReader.StartPointer, blobReader.Length);
                     int removeIndex = -1;
                     var group = namespaceGroup[i];
                     for (int j = 0; j < group.Count; j++)
                     {
                         var node = group[j];
-                        if (string.Equals(name, node.Name, StringComparison.Ordinal))
+                        if (name.SequenceEqual(node.NameData))
                         {
                             removeIndex = j;
                             break;
@@ -485,7 +618,7 @@ public class SourceGenerator : ISourceGenerator
             NodeCommon node2 = newRoot;
             while (addStack.Count > 0)
             {
-                node2 = node2.GetOrAddChild(addStack.Pop().Name);
+                node2 = node2.GetOrAddChild((NodeCommon)addStack.Pop());
             }
             node2.Children.Add(additionalNodes[i].CloneWithNewParent(node2));
         }
@@ -519,7 +652,7 @@ public class SourceGenerator : ISourceGenerator
                     lastWritedEndIf = true;
                     itw.WriteLine("#endif");
                 }
-                itw.WriteLine($"namespace {nodeCommon.Name}");
+                itw.WriteLine(nodeCommon.GetText(modifierCache.TryGetValue(nodeCommon, out var modifer) ? modifer : defaultModifer));
                 itw.WriteLine('{');
                 itw.Indent++;
                 index++;
@@ -537,16 +670,22 @@ public class SourceGenerator : ISourceGenerator
                     }
                     itw.WriteLine($"#if {leaf.Condition}");
                 }
-                foreach (var line in leaf.Lines)
+                for (int i = 0; i < leaf.Lines.Length; i++)
                 {
-                    itw.WriteLine(line);
+                    if (i == leaf.ModiferLineIndex)
+                    {
+                        itw.WriteLineWithSpace(modifierCache.TryGetValue(leaf, out var modifer) ? modifer : defaultModifer, leaf.Lines[i]);
+                    }
+                    else
+                    {
+                        itw.WriteLine(leaf.Lines[i]);
+                    }
                 }
                 lastLeaf = leaf;
                 lastWritedEndIf = false;
             }
         }
-        var result = stringWriter.ToString();
-        Console.WriteLine(result);
-        context.AddSource($"{nameof(FutureFeatureGenerator)}.cs", result);
+        var result = itw.ToString();
+        context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
     }
 }

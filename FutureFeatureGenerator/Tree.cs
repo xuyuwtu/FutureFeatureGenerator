@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -10,13 +11,16 @@ namespace FutureFeatureGenerator;
 [DebuggerDisplay("{Name}")]
 internal abstract class NodeBase
 {
-    public string Name;
+    public static readonly StringCache NodeNameCache = new();
+    public readonly string Name;
+    public readonly byte[] NameData;
     public int Depth;
     public bool HasChildren;
     public NodeBase? Parent;
     public NodeBase(string name, bool hasChildren, NodeBase? parent)
     {
         Name = name;
+        NameData = NodeNameCache.GetOrAddAsBytes(name);
         HasChildren = hasChildren;
         Parent = parent;
     }
@@ -33,10 +37,11 @@ internal abstract class NodeBase
 internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
 {
     public List<NodeBase> Children = new();
-
+    protected string? WriteString { get; set; }
     public NodeCommon(string name, NodeBase? parent) : base(name, true, parent)
     {
     }
+    public virtual string GetText(string modifer) => WriteString ??= $"namespace {Name}";
     private void ThrowIfExists(string name)
     {
         foreach (var child in Children)
@@ -57,10 +62,21 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
         Children.Add(node);
         return node;
     }
-    public void AddChild(string name, Stream contentStream)
+    public void AddChild(string name, Stream contentStream, int startLine = 2)
     {
         ThrowIfExists(name);
-        Children.Add(new TempNodeLeaf(name, this, contentStream) { Depth = Depth + 1 });
+        Children.Add(new TempNodeLeaf(name, this, contentStream, startLine) { Depth = Depth + 1 });
+    }
+    public void AddChild(string name, StreamReaderWrapper readerWrapper, int startLine = 2)
+    {
+        ThrowIfExists(name);
+        Children.Add(new TempNodeLeaf(name, this, readerWrapper, startLine) { Depth = Depth + 1 });
+    }
+    public void AddChild(NodeBase node)
+    {
+        ThrowIfExists(node.Name);
+        node.Depth = Depth + 1;
+        Children.Add(node);
     }
     public override NodeBase? FindNode(string name)
     {
@@ -86,18 +102,20 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
         node = null;
         return false;
     }
-    public NodeCommon GetOrAddChild(string name)
+    public NodeCommon GetOrAddChild(NodeCommon nodeBase)
     {
-        if(FindNode(name, out var node))
+        if(FindNode(nodeBase.Name, out var node))
         {
             return (NodeCommon)node;
         }
-        return AddChild(name);
+        var result = nodeBase.Clone();
+        AddChild(result);
+        return result;
     }
+    protected virtual NodeCommon Clone() => new NodeCommon(Name, Parent);
     public List<NodeBase>.Enumerator GetEnumerator() => Children.GetEnumerator();
     IEnumerator<NodeBase> IEnumerable<NodeBase>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
 }
 internal class NodeRoot : NodeCommon
 {
@@ -118,7 +136,7 @@ internal class NodeRoot : NodeCommon
             return null;
         }
         NodeBase? node = this;
-        var nameList = fullName.Split(Utils.Separator);
+        var nameList = fullName.Split(Utils.PointSeparator);
         var count = nameList.Length - 1;
         for(int i = 0; i < count; i++)
         {
@@ -131,6 +149,14 @@ internal class NodeRoot : NodeCommon
         return node;
     }
 }
+internal class NodeClass : NodeCommon
+{
+    public NodeClass(string name, NodeBase? parent) : base(name, parent)
+    {
+    }
+    public override string GetText(string modifer) => $"{modifer} static partial class Future{Name}";
+    protected override NodeCommon Clone() => new NodeClass(Name, Parent);
+}
 internal class TempNodeLeaf : NodeBase
 {
     public LanguageVersion LanguageVersion;
@@ -138,16 +164,19 @@ internal class TempNodeLeaf : NodeBase
     public List<string> Dependencies = new();
     public List<NodeBase> NodeDependencies = new();
     public List<string> Lines = new();
-    public TempNodeLeaf(string name, NodeBase parent, Stream contentStream) : base(name, false, parent)
+    public TempNodeLeaf(string name, NodeBase parent, StreamReaderWrapper readerWrapper, int startLine = 2) : base(name, false, parent)
     {
-        var sr = new StreamReader(contentStream);
-        const int ReadDependencies = 0, ReadCondition = 1, ReadLine = 2;
+        const int ReadDependencies = 0, ReadCondition = 1, ReadLine = 2, EndCondition = 3;
         var state = 0;
-        string? text = sr.ReadLine();
-        LanguageVersion = Utils.GetLanguageVersion(text.Substring("//".Length).Trim());
-        while (!sr.EndOfStream)
+        while(readerWrapper.CurrentLine < startLine)
         {
-            text = sr.ReadLine();
+            readerWrapper.ReadLine();
+        }
+        string? text = readerWrapper.ReadLine();
+        LanguageVersion = Utils.GetLanguageVersion(text.Substring("//".Length).Trim());
+        while (!readerWrapper.EndOfStream)
+        {
+            text = readerWrapper.ReadLine();
             if (string.IsNullOrEmpty(text))
             {
                 continue;
@@ -170,23 +199,40 @@ internal class TempNodeLeaf : NodeBase
                     state++;
                     break;
                 case ReadLine:
-                    Lines.Add(text);
+                    if (text.StartsWith("#endif"))
+                    {
+                        state++;
+                        goto case EndCondition;
+                    }
+                    else
+                    {
+                        Lines.Add(text);
+                    }
                     break;
+                case EndCondition:
+                    if(text.Trim() != "#endif")
+                    {
+                        throw new InvalidDataException("the last line must be '#endif'");
+                    }
+                    goto endRead;
                 default:
                     throw new NotImplementedException("unknown state");
             }
         }
-        if(text!.Trim() != "#endif")
+        endRead:
+        if(state != EndCondition)
         {
-            throw new InvalidDataException("the last line must be '#endif'");
+            throw new InvalidDataException("not found '^#endif'");
         }
-        Lines.RemoveAt(Lines.Count - 1);
         if (string.IsNullOrEmpty(Condition))
         {
             throw new ArgumentException("Condition cannot be null");
         }
         // resolve null warn
         Condition ??= "";
+    }
+    public TempNodeLeaf(string name, NodeBase parent, Stream contentStream, int startLine) : this(name, parent, new StreamReader(contentStream).GetWrapper(), startLine)
+    {
     }
     public NodeLeaf GetNodeLeaf(StringCache condititonCache, NodeLeaf[] dependencies)
     {
@@ -200,11 +246,19 @@ internal class NodeLeaf : NodeBase
     public NodeLeaf[] Dependencies;
     public string[] Lines;
     public int Order;
+    public int ModiferLineIndex = -1;
     public NodeLeaf(string name, NodeBase parent, string condition, NodeLeaf[] dependencies, string[] lines) : base(name, false, parent ?? throw new ArgumentNullException(nameof(parent)))
     {
         Condition = condition;
         Dependencies = dependencies;
         Lines = lines;
     }
-    public NodeLeaf CloneWithNewParent(NodeBase parent) => new(Name, parent, Condition, Dependencies, Lines) { Depth = Depth, LanguageVersion = LanguageVersion };
+    public NodeLeaf CloneWithNewParent(NodeBase parent) => new(Name, parent, Condition, Dependencies, Lines) { Depth = Depth, LanguageVersion = LanguageVersion, Order = Order, ModiferLineIndex = ModiferLineIndex };
+}
+internal class NodeEqualityComparer : IEqualityComparer<NodeBase>
+{
+    // there may be bugs
+    public bool Equals(NodeBase x, NodeBase y) => ReferenceEquals(x.Parent!.Name, y.Parent!.Name) && ReferenceEquals(x.Name, y.Name);
+
+    public int GetHashCode(NodeBase obj) => obj.Name.GetHashCode();
 }

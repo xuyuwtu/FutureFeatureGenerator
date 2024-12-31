@@ -1,0 +1,5 @@
+﻿System
+	Index public
+	Range public
+	Diagnostics.CodeAnalysis.* public
+	Runtime.CompilerServices.CallerArgumentExpressionAttribute public

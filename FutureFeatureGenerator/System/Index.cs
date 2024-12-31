@@ -1,4 +1,5 @@
-﻿// 8.0
+﻿namespace System;
+// 8.0
 // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.cs
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 internal readonly struct Index : IEquatable<Index>
