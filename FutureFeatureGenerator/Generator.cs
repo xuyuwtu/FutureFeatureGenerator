@@ -22,6 +22,9 @@ public class FeatureGenerator :
     private static readonly StringCache writeStringCache = new();
     private readonly Dictionary<NodeBase, string> modifierCache = new(new NodeEqualityComparer());
     public const string FileName = "FutureFeature.txt";
+    const char commentChar = ';';
+    const char childrenLeafAllMatchChar = '*';
+    const string childrenLeafAllMatchString = "*";
     private readonly NodeRoot Root = new();
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
@@ -68,7 +71,10 @@ public class FeatureGenerator :
             {
                 var parent = new NodeClass(names[count], node);
                 node.AddChild(parent);
-                var stream = assembly.GetManifestResourceStream(resourceName);
+                using var stream = assembly.GetManifestResourceStream(resourceName)!;
+                // format:
+                // // <StartLine> <MethodName>
+                // // ...
                 var sr = new StreamReader(stream).GetWrapper();
                 var list = new List<(int startLine, string name)>();
                 var text = sr.ReadLine();
@@ -80,13 +86,13 @@ public class FeatureGenerator :
                 } while (text.StartsWith("//"));
                 foreach (var pair in list)
                 {
-                    stream.Seek(0, SeekOrigin.Begin);
-                    parent.AddChild(pair.name, stream, pair.startLine);
+                    parent.AddChild(pair.name, sr, pair.startLine);
                 }
             }
             else
             {
-                node.AddChild(names[count], assembly.GetManifestResourceStream(resourceName)!);
+                using var stream = assembly.GetManifestResourceStream(resourceName)!;
+                node.AddChild(names[count], stream);
             }
         }
         var hasDependencyLeaf = new List<TempNodeLeaf>();
@@ -126,6 +132,7 @@ public class FeatureGenerator :
                 nodeLeaf.NodeDependencies.Add(Root.FindNodeByFullName(dependency) ?? throw new InvalidDataException($"'{dependency}' not found"));
             }
         }
+        // [NodeLeaf, ..., TempNodeLeaf, ...]
         tempAllLeaf.Sort(static (x1, x2) =>
         {
             if (x1 is NodeLeaf)
@@ -239,6 +246,12 @@ public class FeatureGenerator :
                     }
                     namespaceCache.Add(node, string.Join(".", names));
                 }
+                // [NodeCommon, ..., NodeLeaf, ...]
+                // if condition is:
+                // NodeLeaf1 true
+                // NodeLeaf2 false
+                // NodeLeaf3 true
+                // => [NodeLeaf1 { Order = 0 }, NodeLeaf3 { Order = 1 }, NodeLeaf2 { Order = 2 }]
                 node.Children.Sort(static (x1, x2) =>
                 {
                     if (x1 is NodeCommon && x2 is NodeLeaf)
@@ -359,7 +372,7 @@ public class FeatureGenerator :
             {
                 continue;
             }
-            if (i == 0 && line[0] == '*')
+            if (i == 0 && line[0] == childrenLeafAllMatchChar)
             {
                 additionalNodes.AddRange(allLeaf);
                 if (line.Contains(' ') && Array.IndexOf(Modifiers.All, line.Substring(line.IndexOf(' ')).Trim()) is var modIndex && modIndex != -1)
@@ -368,7 +381,7 @@ public class FeatureGenerator :
                 }
                 break;
             }
-            if (line[0] == ';')
+            if (line[0] == commentChar)
             {
                 continue;
             }
@@ -389,7 +402,7 @@ public class FeatureGenerator :
                     spaceLength++;
                 }
             }
-            if (spaceLength % 4 != 0 || line[j] == ';')
+            if (spaceLength % 4 != 0 || line[j] == commentChar)
             {
                 continue;
             }
@@ -434,7 +447,7 @@ public class FeatureGenerator :
                     }
                     checkName = checkName.Substring(0, spaceIndex);
                 }
-                if (checkName == "*")
+                if (checkName == childrenLeafAllMatchString)
                 {
                     foreach (var nodeLeaf2 in ((NodeCommon)node).Children.OfType<NodeLeaf>())
                     {
@@ -442,13 +455,6 @@ public class FeatureGenerator :
                         if (modifer is not null)
                         {
                             modifierCache[nodeLeaf2] = modifer;
-                            foreach (var dependency in nodeLeaf2.Dependencies)
-                            {
-                                if (dependency.Name.EndsWith(nameof(Attribute)))
-                                {
-                                    modifierCache[dependency] = modifer;
-                                }
-                            }
                         }
                     }
                     break;
@@ -464,13 +470,6 @@ public class FeatureGenerator :
                     if (modifer is not null)
                     {
                         modifierCache[nodeLeaf] = modifer;
-                        foreach (var dependency in nodeLeaf.Dependencies)
-                        {
-                            if (!dependency.Name.EndsWith(nameof(Attribute)))
-                            {
-                                modifierCache[dependency] = modifer;
-                            }
-                        }
                     }
                     break;
                 }
@@ -564,10 +563,10 @@ public class FeatureGenerator :
                     var blobReader = mtReader.GetBlobReader(typeDefinition.Name);
                     var name = new Span<byte>(blobReader.StartPointer, blobReader.Length);
                     int removeIndex = -1;
-                    var group = namespaceGroup[i];
-                    for (int j = 0; j < group.Count; j++)
+                    var groupNodes = namespaceGroup[i];
+                    for (int j = 0; j < groupNodes.Count; j++)
                     {
-                        var node = group[j];
+                        var node = groupNodes[j];
                         if (name.SequenceEqual(node.NameData))
                         {
                             removeIndex = j;
@@ -576,7 +575,7 @@ public class FeatureGenerator :
                     }
                     if(removeIndex != -1)
                     {
-                        group.RemoveAt(removeIndex);
+                        groupNodes.RemoveAt(removeIndex);
                     }
                 }
             }
@@ -622,7 +621,7 @@ public class FeatureGenerator :
             }
             node2.Children.Add(additionalNodes[i].CloneWithNewParent(node2));
         }
-        var enumerators = new List<NodeBase>.Enumerator[additionalNodes.Select(x => x.Depth).Max()];
+        var enumerators = new List<NodeBase>.Enumerator[additionalNodes.Select(static x => x.Depth).Max()];
         index = 0;
         enumerators[0] = newRoot.GetEnumerator();
         NodeLeaf? lastLeaf = null;

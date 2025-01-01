@@ -2,12 +2,12 @@
 
 namespace FutureFeatureGenerator;
 
-internal struct StreamReaderWrapper
+internal class StreamReaderWrapper
 {
     public StreamReader Reader;
     private int _currentLine = 1;
-    public readonly int CurrentLine => _currentLine;
-    public readonly bool EndOfStream => Reader.EndOfStream;
+    public int CurrentLine => _currentLine;
+    public bool EndOfStream => Reader.EndOfStream;
     public StreamReaderWrapper(StreamReader reader) => Reader = reader;
     public string ReadLine()
     {

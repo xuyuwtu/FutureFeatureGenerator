@@ -30,6 +30,17 @@ The default modifier is `internal`. If you want to change it to public, simply a
 
 If the target to be added is a method, the type where the method resides will be named "Future" plus the original type name. If the method is an instance method, `this` will be added as an extension method. If it is a `static` method, it will be added as is.
 
+For the convenience of multi-targeting compilation, such as `netstandard2.0;net6`, the compilation condition for `static` methods is set to `true`, so there's no need to write conditional compilation.
+```csharp
+FutureArgumentNullException.ThrowIfNull(arg);
+
+#if NET6_0_OR_GREATER
+ArgumentNullException.ThrowIfNull(arg);
+#else
+FutureArgumentNullException.ThrowIfNull(arg);
+#endif
+```
+
 Provide the following types and methods:
 ```
 System
