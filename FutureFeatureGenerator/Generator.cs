@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -34,7 +32,10 @@ public class FeatureGenerator :
         $"System.{nameof(ArgumentException)}.cs",
         $"System.{nameof(ArgumentNullException)}.cs",
         $"System.{nameof(ArgumentOutOfRangeException)}.cs",
+        $"System.{nameof(Char)}.cs",
+        $"System.{nameof(Type)}.cs",
     };
+    private bool _isIniaialized = false;
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
 #else
@@ -45,6 +46,11 @@ public class FeatureGenerator :
         context.RegisterSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect(), context.CompilationProvider.WithComparer(CompilationExternalReferencesEqualityComparer.Instance)
             ), Execute);
 #endif
+        if (_isIniaialized)
+        {
+            return;
+        }
+        _isIniaialized = true;
         var assembly = Assembly.GetExecutingAssembly();
         foreach (var resourceName in assembly.GetManifestResourceNames())
         {
@@ -295,9 +301,18 @@ public class FeatureGenerator :
 #if UseIIncrementalGenerator
     private unsafe void Execute(SourceProductionContext context, (ImmutableArray<AdditionalText> additionalFiles, Compilation compilation) data)
 #else
-    public void Execute(GeneratorExecutionContext context)
+    public unsafe void Execute(GeneratorExecutionContext context)
 #endif
     {
+#if UseIIncrementalGenerator
+        var additionalFiles = data.additionalFiles;
+#else
+        var additionalFiles = context.AdditionalFiles;
+#endif
+        if (additionalFiles.Length == 0)
+        {
+            return;
+        }
 #if UseIIncrementalGenerator
         var compilation = data.compilation;
 #else
@@ -307,22 +322,12 @@ public class FeatureGenerator :
         {
             return;
         }
-#if UseIIncrementalGenerator
-        var additionalFiles = data.additionalFiles;
-#else
-        var additionalFiles = context.AdditionalFiles;
-#endif
         var compilationLanguageVersion = csharpCompilation.LanguageVersion;
         if (compilationLanguageVersion == LanguageVersion.Default)
         {
             compilationLanguageVersion = LanguageVersion.Latest;
         }
-        var additionalText = additionalFiles
-#if UseIIncrementalGenerator
-            .First();
-#else
-            .FirstOrDefault(x => string.Equals(FileName, Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase));
-#endif
+        var additionalText = additionalFiles.FirstOrDefault(x => string.Equals(FileName, Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase));
         if (additionalText is null)
         {
             return;
@@ -357,7 +362,6 @@ public class FeatureGenerator :
             return;
         }
         var memoryStream = new MemoryStream();
-        var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
         var additionalNodes = new List<NodeLeaf>();
         var depth = -1;
         var depthNode = new Stack<NodeCommon>();
@@ -503,7 +507,8 @@ public class FeatureGenerator :
                 removeCount++;
             }
         }
-        var groups = additionalNodes.Distinct().GroupBy(x => namespaceCache[(NodeCommon)x.Parent!], static x => x, ReferenceEqualityComparer<string>.Instance);
+        var groups = additionalNodes.Where(static x => x.Parent is not NodeClass).Distinct().GroupBy(x => namespaceCache[(NodeCommon)x.Parent!], static x => x, ReferenceEqualityComparer<string>.Instance);
+        var isNodeClassNodes = additionalNodes.Where(static x => x.Parent is NodeClass).Distinct().ToArray();
         var namespaceTexts = new string[groups.Count()];
         var namespaceGroup = new List<NodeLeaf>[namespaceTexts.Length];
         var index = 0;
@@ -585,6 +590,7 @@ public class FeatureGenerator :
             }
         }
         additionalNodes.Clear();
+        additionalNodes.AddRange(isNodeClassNodes);
         foreach(var nodes in namespaceGroup)
         {
             additionalNodes.AddRange(nodes);
@@ -600,6 +606,8 @@ public class FeatureGenerator :
         }
         additionalNodes = additionalNodes.Distinct().ToList();
         additionalNodes.Sort(static (x1, x2) => x1.Order.CompareTo(x2.Order));
+        var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
+        itw.WriteLine("#nullable enable");
         foreach (var additionalNode in additionalNodes)
         {
             itw.WriteLine($"// {namespaceCache[(NodeCommon)additionalNode.Parent!]}.{additionalNode.Name}");

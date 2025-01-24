@@ -3,3 +3,5 @@
 	Range public
 	Diagnostics.CodeAnalysis.* public
 	Runtime.CompilerServices.CallerArgumentExpressionAttribute public
+	ArgumentException
+		ThrowIfNullOrEmpty()

@@ -1,7 +1,7 @@
 ﻿namespace System;
 // 8.0
-// System.Index.cs
-// System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.cs
+// System.Index
+// System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 internal readonly struct Range : IEquatable<Range>
 {

@@ -1,9 +1,7 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -131,13 +129,9 @@ internal class NodeRoot : NodeCommon
     }
     public NodeBase? FindNodeByFullName(string fullName)
     {
-        if (!fullName.EndsWith(".cs"))
-        {
-            return null;
-        }
         NodeBase? node = this;
         var nameList = fullName.Split(Utils.PointSeparator);
-        var count = nameList.Length - 1;
+        var count = nameList.Length;
         for(int i = 0; i < count; i++)
         {
             if (node is null)
@@ -173,7 +167,8 @@ internal class TempNodeLeaf : NodeBase
             readerWrapper.ReadLine();
         }
         string? text = readerWrapper.ReadLine();
-        LanguageVersion = Utils.GetLanguageVersion(text.Substring("//".Length).Trim());
+        var skipCount = text.IndexOf('/');
+        LanguageVersion = Utils.GetLanguageVersion(text.AsSpan(skipCount + "//".Length).Trim());
         while (!readerWrapper.EndOfStream)
         {
             text = readerWrapper.ReadLine();
@@ -184,9 +179,9 @@ internal class TempNodeLeaf : NodeBase
             switch (state)
             {
                 case ReadDependencies:
-                    if (text.StartsWith("//"))
+                    if (text.AsSpan(skipCount).StartsWith("//".AsSpan()))
                     {
-                        Dependencies.Add(text.Substring("//".Length).Trim());
+                        Dependencies.Add(text.AsSpan(skipCount + "//".Length).Trim().ToString());
                     }
                     else
                     {
@@ -206,7 +201,7 @@ internal class TempNodeLeaf : NodeBase
                     }
                     else
                     {
-                        Lines.Add(text);
+                        Lines.Add(text.AsSpan(skipCount).ToString());
                     }
                     break;
                 case EndCondition:

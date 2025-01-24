@@ -8,7 +8,7 @@ internal static class Utils
 {
     public static readonly char[] PointSeparator = new char[] { '.' };
     public static readonly char[] SpaceSeparator = new char[] { ' ' };
-    public static LanguageVersion GetLanguageVersion(string version)
+    public static LanguageVersion GetLanguageVersion(ReadOnlySpan<char> version)
     {
         return version switch
         {
@@ -28,7 +28,7 @@ internal static class Utils
             "11.0" => (LanguageVersion)1100,
             "12.0" => (LanguageVersion)1200,
             "13.0" => (LanguageVersion)1300,
-            _ => throw new ArgumentException($"invalide version '{version}'"),
+            _ => throw new ArgumentException($"invalide version '{version.ToString()}'"),
         };
     }
     public static int GetNumberFromSingleLineComment(string s)

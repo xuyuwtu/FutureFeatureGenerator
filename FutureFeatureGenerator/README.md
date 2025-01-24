@@ -62,6 +62,8 @@ System
         NotNullAttribute
         NotNullIfNotNullAttribute
         NotNullWhenAttribute
+        ; 11.0
+        StringSyntaxAttribute
     IO
         Stream
             ;Read(Span<byte>)
@@ -103,6 +105,13 @@ System
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
 ;   8.0
+    Char
+        IsAscii()
+        IsBetween()
+        IsAsciiDigit()
     Index
     Range
+    Type
+        GetConstructor()
+        GetMethod()
 ```

@@ -1,6 +1,6 @@
 ﻿namespace System;
 // 8.0
-// System.Diagnostics.CodeAnalysis.NotNullWhenAttribute.cs
+// System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 internal readonly struct Index : IEquatable<Index>
 {
