@@ -507,6 +507,11 @@ public class FeatureGenerator :
                 removeCount++;
             }
         }
+        count = additionalNodes.Count;
+        for (int i = 0; i < count; i++)
+        {
+            additionalNodes.AddRange(additionalNodes[i].Dependencies);
+        }
         var groups = additionalNodes.Where(static x => x.Parent is not NodeClass).Distinct().GroupBy(x => namespaceCache[(NodeCommon)x.Parent!], static x => x, ReferenceEqualityComparer<string>.Instance);
         var isNodeClassNodes = additionalNodes.Where(static x => x.Parent is NodeClass).Distinct().ToArray();
         var namespaceTexts = new string[groups.Count()];
@@ -599,12 +604,7 @@ public class FeatureGenerator :
         {
             return;
         }
-        count = additionalNodes.Count;
-        for (int i = 0; i < count; i++)
-        {
-            additionalNodes.AddRange(additionalNodes[i].Dependencies);
-        }
-        additionalNodes = additionalNodes.Distinct().ToList();
+        additionalNodes = additionalNodes.Distinct(ReferenceEqualityComparer<NodeLeaf>.Instance).ToList();
         additionalNodes.Sort(static (x1, x2) => x1.Order.CompareTo(x2.Order));
         var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
         itw.WriteLine("#nullable enable");
