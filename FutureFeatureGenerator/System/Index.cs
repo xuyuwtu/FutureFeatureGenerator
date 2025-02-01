@@ -5,7 +5,7 @@
 internal readonly struct Index : IEquatable<Index>
 {
     private readonly int _value;
-    #if (NETCOREAPP || NETSTANDARD || NET45_OR_GREATER)
+    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     #endif
     public Index(int value, bool fromEnd = false)
@@ -26,7 +26,7 @@ internal readonly struct Index : IEquatable<Index>
     }
     public static Index Start => new Index(0);
     public static Index End => new Index(~0);
-    #if (NETCOREAPP || NETSTANDARD || NET45_OR_GREATER)
+    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     #endif
     public static Index FromStart(int value)
@@ -38,7 +38,7 @@ internal readonly struct Index : IEquatable<Index>
 
         return new Index(value);
     }
-    #if (NETCOREAPP || NETSTANDARD || NET45_OR_GREATER)
+    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     #endif
     public static Index FromEnd(int value)
@@ -61,7 +61,7 @@ internal readonly struct Index : IEquatable<Index>
         }
     }
     public bool IsFromEnd => _value < 0;
-    #if (NETCOREAPP || NETSTANDARD || NET45_OR_GREATER)
+    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     #endif
     public int GetOffset(int length)

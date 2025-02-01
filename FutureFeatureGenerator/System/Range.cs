@@ -31,7 +31,7 @@ internal readonly struct Range : IEquatable<Range>
     public static Range StartAt(Index start) => new Range(start, Index.End);
     public static Range EndAt(Index end) => new Range(Index.Start, end);
     public static Range All => new Range(Index.Start, Index.End);
-    #if (NETCOREAPP || NETSTANDARD || NET45_OR_GREATER)
+    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     #endif
     public (int Offset, int Length) GetOffsetAndLength(int length)
