@@ -43,13 +43,15 @@ public class FeatureGenerator :
 #endif
     {
 #if UseIIncrementalGenerator
-        context.RegisterSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect(), context.CompilationProvider.WithComparer(CompilationExternalReferencesEqualityComparer.Instance)
-            ), Execute);
+        context.RegisterSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect(), context.CompilationProvider.WithComparer(CompilationExternalReferencesEqualityComparer.Instance)), Execute);
 #endif
-        if (_isIniaialized)
+        if (!_isIniaialized)
         {
-            return;
+            Init();
         }
+    }
+    private void Init()
+    {
         _isIniaialized = true;
         var assembly = Assembly.GetExecutingAssembly();
         foreach (var resourceName in assembly.GetManifestResourceNames())
