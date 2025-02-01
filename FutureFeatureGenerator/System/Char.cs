@@ -3,7 +3,7 @@
 // 27 IsAsciiDigit()
 namespace System;
 
-internal static class FutureChar
+internal static partial class FutureChar
 {
     // NET6_0_OR_GREATER
     // 5

@@ -5,7 +5,7 @@
 // 63 ThrowIfLessThan()
 // 76 ThrowIfLessThanOrEqual()
 namespace System;
-internal static class FutureArgumentOutOfRangeException
+internal static partial class FutureArgumentOutOfRangeException
 {
     // NET8_0_OR_GREATER
     // 10.0

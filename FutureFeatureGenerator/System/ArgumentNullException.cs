@@ -1,6 +1,6 @@
 ﻿// 6 ThrowIfNull()
 namespace System;
-internal static class FutureArgumentNullException
+internal static partial class FutureArgumentNullException
 {
     // NET6_0_OR_GREATER
     // 10.0

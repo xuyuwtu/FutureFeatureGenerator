@@ -1,7 +1,7 @@
 ﻿// 7 ThrowIfNullOrEmpty()
 // 25 ThrowIfNullOrWhiteSpace()
 namespace System;
-internal static class FutureArgumentException
+internal static partial class FutureArgumentException
 {
     // NET7_0_OR_GREATER
     // 10.0
