@@ -1,5 +1,5 @@
 ﻿namespace System.Diagnostics.CodeAnalysis;
-// 11.0
+/// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
 #if !NET7_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 internal sealed class StringSyntaxAttribute : Attribute

@@ -25,11 +25,13 @@
 
 	<ItemGroup>
 		<Compile Include="*.cs" />
+		<Compile Include="System\CSharpFeatureNames.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\DisallowNullAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\MaybeNullWhenAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullWhenAttribute.cs" />
 		<EmbeddedResource Include="System\**\*.cs" />
+		<EmbeddedResource Remove="System\CSharpFeatureNames.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(_IsPacking)' == 'true'">

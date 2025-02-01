@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using System.Linq.Expressions;
 
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FutureFeatureGenerator;
 
@@ -10,7 +12,7 @@ internal static class Utils
     public static readonly char[] SpaceSeparator = new char[] { ' ' };
     public static LanguageVersion GetLanguageVersion(ReadOnlySpan<char> version)
     {
-        return version switch
+        return GetLanguageVersionByFeature(version) ?? version switch
         {
             "1" => LanguageVersion.CSharp1,
             "2" => LanguageVersion.CSharp2,
@@ -31,15 +33,28 @@ internal static class Utils
             _ => throw new ArgumentException($"invalide version '{version.ToString()}'"),
         };
     }
+    private static LanguageVersion? GetLanguageVersionByFeature(ReadOnlySpan<char> feature)
+    {
+        return feature switch
+        {
+            CSharpFeatureNames.None => LanguageVersion.CSharp1,
+            CSharpFeatureNames.PartialClasses => LanguageVersion.CSharp2,
+            CSharpFeatureNames.AutomaticProperties => LanguageVersion.CSharp3,
+            CSharpFeatureNames.ExtensionMethods => LanguageVersion.CSharp3,
+            CSharpFeatureNames.InModifiers => LanguageVersion.CSharp7_2,
+            CSharpFeatureNames.NullableReferenceTypes => LanguageVersion.CSharp8,
+            _ => null
+        };
+    }
     public static int GetNumberFromSingleLineComment(string s)
     {
         var startIndex = s.IndexOf(' ', "//".Length);
-        if(startIndex == -1)
+        if (startIndex == -1)
         {
             throw new ArgumentException("invalid syntax");
         }
         var endIndex = s.IndexOf(' ', startIndex + 1);
-        if(endIndex == -1)
+        if (endIndex == -1)
         {
             return int.Parse(s.Substring(startIndex + 1));
         }
@@ -97,4 +112,58 @@ internal static class Utils
         return result;
     }
     public static StreamReaderWrapper GetWrapper(this StreamReader reader) => new(reader);
+    public static Func<string[], bool> GetConditionFunc(string condition)
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(
+               $"""
+                #if {condition}
+                #endif
+                """);
+        var ifDirectiveTriviaSyntax = syntaxTree.GetRoot().DescendantNodes(null, true).OfType<IfDirectiveTriviaSyntax>().First();
+        var parameterExpression = Expression.Parameter(typeof(string[]), "preprocessorSymbolNames");
+        var bodyExpression = GetExpression(ifDirectiveTriviaSyntax.Condition, parameterExpression);
+        Func<string[], bool> func;
+        if (bodyExpression is ConstantExpression constantExpression && constantExpression.Type == typeof(bool))
+        {
+            func = (bool)constantExpression.Value! ? static (string[] names) => true : static (string[] names) => false;
+        }
+        else
+        {
+            func = Expression.Lambda<Func<string[], bool>>(bodyExpression, parameterExpression).Compile();
+        }
+        return func;
+    }
+    static Expression GetExpression(ExpressionSyntax expression, ParameterExpression parameterExpression)
+    {
+        switch (expression)
+        {
+            case PrefixUnaryExpressionSyntax prefixUnaryExpressionSyntax:
+                return prefixUnaryExpressionSyntax.Kind() switch
+                {
+                    SyntaxKind.LogicalNotExpression => Expression.Not(GetExpression(prefixUnaryExpressionSyntax.Operand, parameterExpression)),
+                    _ => throw new InvalidDataException(prefixUnaryExpressionSyntax.Kind().ToString()),
+                };
+            case ParenthesizedExpressionSyntax parenthesizedExpressionSyntax:
+                return GetExpression(parenthesizedExpressionSyntax.Expression, parameterExpression);
+            case BinaryExpressionSyntax binaryExpressionSyntax:
+                return binaryExpressionSyntax.Kind() switch
+                {
+                    SyntaxKind.LogicalAndExpression => Expression.And(GetExpression(binaryExpressionSyntax.Left, parameterExpression), GetExpression(binaryExpressionSyntax.Right, parameterExpression)),
+                    SyntaxKind.LogicalOrExpression => Expression.Or(GetExpression(binaryExpressionSyntax.Left, parameterExpression), GetExpression(binaryExpressionSyntax.Right, parameterExpression)),
+                    _ => throw new InvalidDataException(binaryExpressionSyntax.Kind().ToString()),
+                };
+            case IdentifierNameSyntax identifierNameSyntax:
+                Expression<Func<string[], bool>> func = names => names.Contains("1");
+                return Expression.Call(((MethodCallExpression)func.Body).Method, parameterExpression, Expression.Constant(identifierNameSyntax.Identifier.Text, typeof(string)));
+            case LiteralExpressionSyntax:
+                return expression.Kind() switch
+                {
+                    SyntaxKind.TrueLiteralExpression => Expression.Constant(true, typeof(bool)),
+                    SyntaxKind.FalseLiteralExpression => Expression.Constant(false, typeof(bool)),
+                    _ => throw new InvalidDataException(expression.Kind().ToString()),
+                };
+            default:
+                throw new InvalidDataException(expression.GetType().FullName);
+        }
+    }
 }

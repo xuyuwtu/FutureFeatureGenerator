@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace FutureFeatureGenerator;
 [Generator(LanguageNames.CSharp)]
-public class FeatureGenerator : 
+public class FeatureGenerator :
 #if UseIIncrementalGenerator
     IIncrementalGenerator
 #else
@@ -26,15 +26,6 @@ public class FeatureGenerator :
     private readonly NodeRoot Root = new();
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
-    private readonly string[] methodTypeFile = new string[] 
-    { 
-        $"System.IO.{nameof(Stream)}.cs",
-        $"System.{nameof(ArgumentException)}.cs",
-        $"System.{nameof(ArgumentNullException)}.cs",
-        $"System.{nameof(ArgumentOutOfRangeException)}.cs",
-        $"System.{nameof(Char)}.cs",
-        $"System.{nameof(Type)}.cs",
-    };
     private bool _isIniaialized = false;
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -75,32 +66,66 @@ public class FeatureGenerator :
                     node = node.AddChild(name);
                 }
             }
-            if (methodTypeFile.Contains(resourceName))
+            using var stream = assembly.GetManifestResourceStream(resourceName)!;
+            /*
+            if is methodClass
+                    #region
+                    #endregion
+                or
+                    // <StartLine> <MethodName>
+                    // ...
+                end when not start with // (namespace ...)
+            else
+                namespace ...
+                // <CSharpVersion>    
+             */
+            var sr = new StreamReader(stream).GetWrapper();
+            var text = sr.ReadLine();
+            if (text.StartsWith("//"))
             {
                 var parent = new NodeClass(names[count], node);
                 node.AddChild(parent);
-                using var stream = assembly.GetManifestResourceStream(resourceName)!;
-                // format:
-                // // <StartLine> <MethodName>
-                // // ...
-                var sr = new StreamReader(stream).GetWrapper();
                 var list = new List<(int startLine, string name)>();
-                var text = sr.ReadLine();
                 do
                 {
                     var result = text.Substring("//".Length).Split(Utils.SpaceSeparator, StringSplitOptions.RemoveEmptyEntries);
-                    list.Add((int.Parse(result[0]), result[1]));
+                    if (result[0][result[0].Length - 1] == '+')
+                    {
+                        list.Add((-int.Parse(result[0].Remove(result[0].Length - 1)), result[1]));
+                    }
+                    else
+                    {
+                        list.Add((int.Parse(result[0]), result[1]));
+                    }
                     text = sr.ReadLine();
                 } while (text.StartsWith("//"));
-                foreach (var pair in list)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    parent.AddChild(pair.name, sr, pair.startLine);
+                    var (startLine, name) = list[i];
+                    if (startLine < 0)
+                    {
+                        startLine = -startLine + list.Count - i - 1;
+                    }
+                    parent.AddChild(name, sr, startLine);
+                }
+            }
+            else if (text.StartsWith("#region"))
+            {
+                var parent = new NodeClass(names[count], node);
+                node.AddChild(parent);
+                while (!sr.EndOfStream)
+                {
+                    text = sr.ReadLine();
+                    if (text.StartsWith("    #region"))
+                    {
+                        
+                        parent.AddChild(text.Substring("    #region".Length).Trim(), sr, sr.CurrentLine);
+                    }
                 }
             }
             else
             {
-                using var stream = assembly.GetManifestResourceStream(resourceName)!;
-                node.AddChild(names[count], stream);
+                node.AddChild(names[count], sr);
             }
         }
         var hasDependencyLeaf = new List<TempNodeLeaf>();
@@ -341,7 +366,7 @@ public class FeatureGenerator :
         {
             lines = File.ReadAllLines(additionalText.Path);
         }
-        else 
+        else
         {
             var ms = new MemoryStream();
             var sw = new StreamWriter(ms);
@@ -597,7 +622,21 @@ public class FeatureGenerator :
             }
         }
         additionalNodes.Clear();
-        additionalNodes.AddRange(isNodeClassNodes);
+        var preprocessorSymbolNames = csharpCompilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.ToArray();
+        if (preprocessorSymbolNames is { Length: > 0 })
+        {
+            foreach (var node in isNodeClassNodes)
+            {
+                if (node.ConditionFunc(preprocessorSymbolNames))
+                {
+                    additionalNodes.Add(node);
+                }
+            }
+        }
+        else
+        {
+            additionalNodes.AddRange(isNodeClassNodes);
+        }
         foreach(var nodes in namespaceGroup)
         {
             additionalNodes.AddRange(nodes);

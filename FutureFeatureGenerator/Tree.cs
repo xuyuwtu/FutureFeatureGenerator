@@ -168,7 +168,19 @@ internal class TempNodeLeaf : NodeBase
         }
         string? text = readerWrapper.ReadLine();
         var skipCount = text.IndexOf('/');
-        LanguageVersion = Utils.GetLanguageVersion(text.AsSpan(skipCount + "//".Length).Trim());
+        var versionText = text.AsSpan(skipCount + "//".Length);
+        /*
+          // <versionText> or <featureName>
+
+          /// <see cref="CSharpFeatureNames.<featureName>"/>
+        */
+        if (versionText[0] == '/') 
+        {
+            var startIndex = versionText.IndexOf('.') + 1;
+            versionText = versionText.Slice(startIndex, versionText.Slice(startIndex).IndexOf('"'));
+        }
+        LanguageVersion = Utils.GetLanguageVersion(versionText.Trim());
+        var ifCount = 0;
         while (!readerWrapper.EndOfStream)
         {
             text = readerWrapper.ReadLine();
@@ -191,13 +203,26 @@ internal class TempNodeLeaf : NodeBase
                     break;
                 case ReadCondition:
                     Condition = text.Substring("#if".Length).Trim();
+                    ifCount = 1;
                     state++;
                     break;
                 case ReadLine:
-                    if (text.StartsWith("#endif"))
+                    if (text.StartsWith("#if"))
                     {
-                        state++;
-                        goto case EndCondition;
+                        ifCount++;
+                        Lines.Add(text);
+                    }
+                    else if (text.StartsWith("#endif"))
+                    {
+                        if (--ifCount == 0)
+                        {
+                            state++;
+                            goto case EndCondition;
+                        }
+                        else
+                        {
+                            Lines.Add(text);
+                        }
                     }
                     else
                     {
@@ -236,8 +261,10 @@ internal class TempNodeLeaf : NodeBase
 }
 internal class NodeLeaf : NodeBase
 {
+    private static readonly Dictionary<string, Func<string[], bool>> condititonFuncCache = new();
     public LanguageVersion LanguageVersion;
     public string Condition;
+    public Func<string[], bool> ConditionFunc;
     public NodeLeaf[] Dependencies;
     public string[] Lines;
     public int Order;
@@ -245,6 +272,12 @@ internal class NodeLeaf : NodeBase
     public NodeLeaf(string name, NodeBase parent, string condition, NodeLeaf[] dependencies, string[] lines) : base(name, false, parent ?? throw new ArgumentNullException(nameof(parent)))
     {
         Condition = condition;
+        if (!condititonFuncCache.TryGetValue(condition, out var func))
+        {
+            func = Utils.GetConditionFunc(condition);
+            condititonFuncCache.Add(condition, func);
+        }
+        ConditionFunc = func;
         Dependencies = dependencies;
         Lines = lines;
     }
