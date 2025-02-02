@@ -38,10 +38,12 @@ internal static class Utils
         return feature switch
         {
             CSharpFeatureNames.None => LanguageVersion.CSharp1,
+            CSharpFeatureNames.GenericSupport => LanguageVersion.CSharp2,
             CSharpFeatureNames.PartialClasses => LanguageVersion.CSharp2,
             CSharpFeatureNames.AutomaticProperties => LanguageVersion.CSharp3,
             CSharpFeatureNames.ExtensionMethods => LanguageVersion.CSharp3,
             CSharpFeatureNames.InModifiers => LanguageVersion.CSharp7_2,
+            CSharpFeatureNames.IntroduceReadonly => LanguageVersion.CSharp7_2,
             CSharpFeatureNames.NullableReferenceTypes => LanguageVersion.CSharp8,
             _ => null
         };

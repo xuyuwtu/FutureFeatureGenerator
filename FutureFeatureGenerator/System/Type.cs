@@ -8,7 +8,7 @@ internal static partial class FutureType
 #if !NET6_0_OR_GREATER
     internal static Reflection.ConstructorInfo GetConstructor(this Type self, Reflection.BindingFlags bindingAttr, Type[] types)
     {
-        return self.GetConstructor(bindingAttr, binder: null, types, modifiers: null);
+        return self.GetConstructor(bindingAttr, null, types, modifiers: null);
     }
 #endif
     #endregion
@@ -18,7 +18,7 @@ internal static partial class FutureType
 #if !NET6_0_OR_GREATER
     internal static Reflection.MethodInfo? GetMethod(this Type self, string name, Reflection.BindingFlags bindingAttr, Type[] types)
     {
-        return self.GetMethod(name, bindingAttr, binder: null, types, modifiers: null);
+        return self.GetMethod(name, bindingAttr, null, types, modifiers: null);
     }
 #endif
     #endregion

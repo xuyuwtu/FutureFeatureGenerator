@@ -1,10 +1,11 @@
-﻿// 7 Read()
-// 30 Write()
+﻿#region
+#endregion
 namespace System.IO;
 internal static partial class FutureStream
 {
     // System.Span`1
-    // 8.0
+    #region Read()
+    /// <see cref="CSharpFeatureNames.ExtensionMethods">
 #if !NETCOREAPP2_1_OR_GREATER
     internal static int Read(this Stream self, Span<byte> buffer)
     {
@@ -25,9 +26,11 @@ internal static partial class FutureStream
         }
     }
 #endif
+    #endregion
 
     // System.ReadOnlySpan`1
-    // 8.0
+    #region Write()
+    /// <see cref="CSharpFeatureNames.ExtensionMethods">
 #if !NETCOREAPP2_1_OR_GREATER
     internal static void Write(this Stream self, ReadOnlySpan<byte> buffer)
     {
@@ -43,4 +46,5 @@ internal static partial class FutureStream
         }
     }
 #endif
+    #endregion
 }

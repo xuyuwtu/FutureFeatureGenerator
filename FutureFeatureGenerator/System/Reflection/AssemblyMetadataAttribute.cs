@@ -1,5 +1,5 @@
 ﻿namespace System.Reflection;
-// 5
+/// <see cref="CSharpFeatureNames.AutomaticProperties">
 #if (!NETCOREAPP && !NETSTANDARD && !NET45_OR_GREATER)
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
 internal sealed class AssemblyMetadataAttribute : Attribute

@@ -1,9 +1,11 @@
-﻿// 6 ThrowIfNull()
+﻿#region
+#endregion
 namespace System;
 internal static partial class FutureArgumentNullException
 {
     // NET6_0_OR_GREATER
-    // 10.0
+    #region ThrowIfNull()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
@@ -15,4 +17,5 @@ internal static partial class FutureArgumentNullException
         }
     }
 #endif
+    #endregion
 }

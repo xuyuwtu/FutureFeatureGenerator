@@ -1,5 +1,5 @@
 ﻿namespace System.Runtime.CompilerServices;
-// 9.0
+/// <see cref="CSharpFeatureNames.None"/>
 #if !NET5_0_OR_GREATER
 internal static class IsExternalInit { }
 #endif

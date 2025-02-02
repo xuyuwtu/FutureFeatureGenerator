@@ -1,14 +1,11 @@
-﻿// 11 ThrowIfEqual()
-// 24 ThrowIfNotEqual()
-// 37 ThrowIfGreaterThan()
-// 50 ThrowIfGreaterThanOrEqual()
-// 63 ThrowIfLessThan()
-// 76 ThrowIfLessThanOrEqual()
+﻿#region
+#endregion
 namespace System;
 internal static partial class FutureArgumentOutOfRangeException
 {
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfEqual()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IEquatable<T>?
@@ -19,9 +16,11 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfNotEqual()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfNotEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IEquatable<T>?
@@ -32,9 +31,11 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfGreaterThan()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfGreaterThan<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
@@ -45,9 +46,11 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfGreaterThanOrEqual()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfGreaterThanOrEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
@@ -58,9 +61,11 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfLessThan()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfLessThan<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
@@ -71,9 +76,11 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfLessThanOrEqual()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfLessThanOrEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
@@ -84,4 +91,5 @@ internal static partial class FutureArgumentOutOfRangeException
         }
     }
 #endif
+    #endregion
 }

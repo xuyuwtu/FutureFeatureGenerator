@@ -1,10 +1,11 @@
-﻿// 7 ThrowIfNullOrEmpty()
-// 25 ThrowIfNullOrWhiteSpace()
+﻿#region
+#endregion
 namespace System;
 internal static partial class FutureArgumentException
 {
     // NET7_0_OR_GREATER
-    // 10.0
+    #region ThrowIfNullOrEmpty()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
@@ -20,9 +21,11 @@ internal static partial class FutureArgumentException
         }
     }
 #endif
+    #endregion
 
     // NET8_0_OR_GREATER
-    // 10.0
+    #region ThrowIfNullOrWhiteSpace()
+    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
@@ -38,4 +41,5 @@ internal static partial class FutureArgumentException
         }
     }
 #endif
+    #endregion
 }
