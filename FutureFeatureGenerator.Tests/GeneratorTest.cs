@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +10,7 @@ public class GeneratorTest
 {
     ImmutableArray<MetadataReference> NetStandard20WithIndexRangeReferences;
     ImmutableArray<MetadataReference> NetStandard20References;
-    public GeneratorTest() 
+    public GeneratorTest()
     {
         NetStandard20WithIndexRangeReferences = ReferenceAssemblies.NetStandard.NetStandard20.AddPackages([new PackageIdentity("IndexRange", "1.0.3")]).ResolveAsync(null, default).Result;
         NetStandard20References = NetStandard20WithIndexRangeReferences.RemoveAll(static x => Path.GetFileName(x.Display) == "IndexRange.dll");

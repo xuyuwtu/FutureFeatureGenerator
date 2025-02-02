@@ -36,7 +36,7 @@ static class Utils
         {
             var span = array[i * 2].Span;
             var index = -1;
-            for(int j = span.End; j >= span.Start; j--)
+            for (int j = span.End; j >= span.Start; j--)
             {
                 if (text[j] == '.')
                 {
@@ -65,13 +65,13 @@ static class Utils
     }
     public static bool AllMatch(string[] fullNames, params string[] names)
     {
-        if(fullNames.Length != names.Length)
+        if (fullNames.Length != names.Length)
         {
             return false;
         }
-        for(int i = 0; i < fullNames.Length; i++)
+        for (int i = 0; i < fullNames.Length; i++)
         {
-            if(!names.Contains(fullNames[i], StringComparer.Ordinal))
+            if (!names.Contains(fullNames[i], StringComparer.Ordinal))
             {
                 return false;
             }

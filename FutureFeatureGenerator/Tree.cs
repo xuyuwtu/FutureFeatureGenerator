@@ -23,7 +23,7 @@ internal abstract class NodeBase
     public virtual NodeBase? FindNode(string name) => null;
     public bool IsSibling(NodeBase node)
     {
-        if(Parent is null || node.Parent is null)
+        if (Parent is null || node.Parent is null)
         {
             return false;
         }
@@ -100,7 +100,7 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
     }
     public NodeCommon GetOrAddChild(NodeCommon nodeBase)
     {
-        if(FindNode(nodeBase.Name, out var node))
+        if (FindNode(nodeBase.Name, out var node))
         {
             return (NodeCommon)node;
         }
@@ -130,7 +130,7 @@ internal class NodeRoot : NodeCommon
         NodeBase? node = this;
         var nameList = fullName.Split(Utils.PointSeparator);
         var count = nameList.Length;
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             if (node is null)
             {
@@ -159,7 +159,7 @@ internal class TempNodeLeaf : NodeBase
     {
         const int ReadDependencies = 0, ReadCondition = 1, ReadLine = 2, EndCondition = 3;
         var state = 0;
-        while(readerWrapper.CurrentLine < startLine)
+        while (readerWrapper.CurrentLine < startLine)
         {
             readerWrapper.ReadLine();
         }
@@ -214,7 +214,7 @@ internal class TempNodeLeaf : NodeBase
                     }
                     break;
                 case EndCondition:
-                    if(text.Trim() != "#endif")
+                    if (text.Trim() != "#endif")
                     {
                         throw new InvalidDataException("the last line must be '#endif'");
                     }
@@ -224,7 +224,7 @@ internal class TempNodeLeaf : NodeBase
             }
         }
         endRead:
-        if(state != EndCondition)
+        if (state != EndCondition)
         {
             throw new InvalidDataException("not found '^#endif'");
         }

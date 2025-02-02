@@ -17,7 +17,7 @@ internal class ReferenceList<T> : IList<T> where T : class
         get => list[index];
         set
         {
-            if(value is null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -74,7 +74,7 @@ internal class ReferenceList<T> : IList<T> where T : class
 
     public int IndexOf(T item)
     {
-        if(item is null)
+        if (item is null)
         {
             return -1;
         }

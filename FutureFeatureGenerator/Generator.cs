@@ -118,7 +118,7 @@ public class FeatureGenerator :
                     text = sr.ReadLine();
                     if (text.StartsWith("    #region"))
                     {
-                        
+
                         parent.AddChild(text.Substring("    #region".Length).Trim(), sr, 4, sr.CurrentLine);
                     }
                 }
@@ -523,7 +523,6 @@ public class FeatureGenerator :
             }
             depth++;
         }
-        var removeCount = 0;
         var count = additionalNodes.Count;
         for (int i = 0; i < count; i++)
         {
@@ -534,7 +533,7 @@ public class FeatureGenerator :
         var namespaceTexts = new string[groups.Count()];
         var namespaceGroup = new List<NodeLeaf>[namespaceTexts.Length];
         var index = 0;
-        foreach(var group in groups)
+        foreach (var group in groups)
         {
             namespaceTexts[index] = group.Key;
             namespaceGroup[index] = group.ToList();
@@ -576,7 +575,7 @@ public class FeatureGenerator :
                         continue;
                     }
                     var i = Array.IndexOf(namespaceHandles, typeDefinition.Namespace);
-                    if(i == -1)
+                    if (i == -1)
                     {
                         var nameSpace = mtReader.GetString(typeDefinition.Namespace);
                         i = Array.IndexOf(namespaceTexts, nameSpace);
@@ -600,7 +599,7 @@ public class FeatureGenerator :
                             break;
                         }
                     }
-                    if(removeIndex != -1)
+                    if (removeIndex != -1)
                     {
                         groupNodes.RemoveAt(removeIndex);
                     }
@@ -627,7 +626,7 @@ public class FeatureGenerator :
         {
             additionalNodes.AddRange(isNodeClassNodes);
         }
-        foreach(var nodes in namespaceGroup)
+        foreach (var nodes in namespaceGroup)
         {
             additionalNodes.AddRange(nodes);
         }
@@ -680,8 +679,8 @@ public class FeatureGenerator :
                         lastWritedEndIf = true;
                         if (needWriteEndIf)
                         {
-                        itw.WriteLine("#endif");
-                    }
+                            itw.WriteLine("#endif");
+                        }
                         needWriteEndIf = false;
                     }
                     itw.Indent--;
@@ -696,8 +695,8 @@ public class FeatureGenerator :
                     lastWritedEndIf = true;
                     if (needWriteEndIf)
                     {
-                    itw.WriteLine("#endif");
-                }
+                        itw.WriteLine("#endif");
+                    }
                     needWriteEndIf = false;
                 }
                 itw.WriteLine(nodeCommon.GetText(modifierCache.TryGetValue(nodeCommon, out var modifer) ? modifer : defaultModifer));
@@ -716,15 +715,15 @@ public class FeatureGenerator :
                         lastWritedEndIf = true;
                         if (needWriteEndIf)
                         {
-                        itw.WriteLine("#endif");
-                    }
+                            itw.WriteLine("#endif");
+                        }
                         needWriteEndIf = false;
                     }
                     if (!ReferenceEquals(ifConditionString, leaf.Condition))
                     {
                         needWriteEndIf = true;
-                    itw.WriteLine($"#if {leaf.Condition}");
-                }
+                        itw.WriteLine($"#if {leaf.Condition}");
+                    }
                 }
                 for (int i = 0; i < leaf.Lines.Length; i++)
                 {

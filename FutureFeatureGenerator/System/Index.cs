@@ -4,9 +4,9 @@
 internal readonly struct Index : IEquatable<Index>
 {
     private readonly int _value;
-    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
+#if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    #endif
+#endif
     public Index(int value, bool fromEnd = false)
     {
         if (value < 0)
@@ -15,9 +15,13 @@ internal readonly struct Index : IEquatable<Index>
         }
 
         if (fromEnd)
+        {
             _value = ~value;
+        }
         else
+        {
             _value = value;
+        }
     }
     private Index(int value)
     {
@@ -25,9 +29,9 @@ internal readonly struct Index : IEquatable<Index>
     }
     public static Index Start => new Index(0);
     public static Index End => new Index(~0);
-    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
+#if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    #endif
+#endif
     public static Index FromStart(int value)
     {
         if (value < 0)
@@ -37,9 +41,9 @@ internal readonly struct Index : IEquatable<Index>
 
         return new Index(value);
     }
-    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
+#if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    #endif
+#endif
     public static Index FromEnd(int value)
     {
         if (value < 0)
@@ -54,15 +58,19 @@ internal readonly struct Index : IEquatable<Index>
         get
         {
             if (_value < 0)
+            {
                 return ~_value;
+            }
             else
+            {
                 return _value;
+            }
         }
     }
     public bool IsFromEnd => _value < 0;
-    #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
+#if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    #endif
+#endif
     public int GetOffset(int length)
     {
         int offset = _value;
@@ -79,7 +87,9 @@ internal readonly struct Index : IEquatable<Index>
     public override string ToString()
     {
         if (IsFromEnd)
+        {
             return ToStringFromEnd();
+        }
 
         return ((uint)Value).ToString();
     }

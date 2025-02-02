@@ -27,7 +27,7 @@ internal class StreamIndentedTextWriter
 
     public StreamIndentedTextWriter(StringCache cache, Stream stream)
     {
-        if(!stream.CanSeek || !stream.CanRead || !stream.CanWrite)
+        if (!stream.CanSeek || !stream.CanRead || !stream.CanWrite)
         {
             throw new ArgumentNullException(nameof(stream), "stream need CanSeek, CanRead and CanWrite");
         }

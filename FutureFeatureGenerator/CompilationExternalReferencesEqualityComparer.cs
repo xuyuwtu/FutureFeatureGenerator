@@ -12,13 +12,13 @@ internal sealed class CompilationExternalReferencesEqualityComparer : IEqualityC
         {
             return true;
         }
-        if(x is null || y is null)
+        if (x is null || y is null)
         {
             return false;
         }
         var xExternalReferences = x.ExternalReferences.OfType<PortableExecutableReference>().ToArray();
         var yExternalReferences = y.ExternalReferences.OfType<PortableExecutableReference>().ToArray();
-        if(xExternalReferences.Length != yExternalReferences.Length)
+        if (xExternalReferences.Length != yExternalReferences.Length)
         {
             return false;
         }
