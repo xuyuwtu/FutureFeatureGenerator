@@ -106,7 +106,7 @@ public class FeatureGenerator :
                     {
                         startLine = -startLine + list.Count - i - 1;
                     }
-                    parent.AddChild(name, sr, startLine);
+                    parent.AddChild(name, sr, 4, startLine);
                 }
             }
             else if (text.StartsWith("#region"))
@@ -119,13 +119,13 @@ public class FeatureGenerator :
                     if (text.StartsWith("    #region"))
                     {
                         
-                        parent.AddChild(text.Substring("    #region".Length).Trim(), sr, sr.CurrentLine);
+                        parent.AddChild(text.Substring("    #region".Length).Trim(), sr, 4, sr.CurrentLine);
                     }
                 }
             }
             else
             {
-                node.AddChild(names[count], sr);
+                node.AddChild(names[count], sr, 0, 2);
             }
         }
         var hasDependencyLeaf = new List<TempNodeLeaf>();
@@ -527,16 +527,6 @@ public class FeatureGenerator :
         var count = additionalNodes.Count;
         for (int i = 0; i < count; i++)
         {
-            var idx = i - removeCount;
-            if (additionalNodes[idx].LanguageVersion > csharpCompilation.LanguageVersion)
-            {
-                additionalNodes.RemoveAt(idx);
-                removeCount++;
-            }
-        }
-        count = additionalNodes.Count;
-        for (int i = 0; i < count; i++)
-        {
             additionalNodes.AddRange(additionalNodes[i].Dependencies);
         }
         var groups = additionalNodes.Where(static x => x.Parent is not NodeClass).Distinct().GroupBy(x => namespaceCache[(NodeCommon)x.Parent!], static x => x, ReferenceEqualityComparer<string>.Instance);
@@ -675,6 +665,8 @@ public class FeatureGenerator :
         enumerators[0] = newRoot.GetEnumerator();
         NodeLeaf? lastLeaf = null;
         var lastWritedEndIf = true;
+        var needWriteEndIf = false;
+        var ifConditionString = condititonCache.GetOrAdd("true");
         while (index != -1)
         {
             ref var enumerator = ref enumerators[index];
@@ -686,7 +678,11 @@ public class FeatureGenerator :
                     if (!lastWritedEndIf)
                     {
                         lastWritedEndIf = true;
+                        if (needWriteEndIf)
+                        {
                         itw.WriteLine("#endif");
+                    }
+                        needWriteEndIf = false;
                     }
                     itw.Indent--;
                     itw.WriteLine('}');
@@ -698,7 +694,11 @@ public class FeatureGenerator :
                 if (!lastWritedEndIf)
                 {
                     lastWritedEndIf = true;
+                    if (needWriteEndIf)
+                    {
                     itw.WriteLine("#endif");
+                }
+                    needWriteEndIf = false;
                 }
                 itw.WriteLine(nodeCommon.GetText(modifierCache.TryGetValue(nodeCommon, out var modifer) ? modifer : defaultModifer));
                 itw.WriteLine('{');
@@ -714,9 +714,17 @@ public class FeatureGenerator :
                     if (!lastWritedEndIf && lastLeaf is not null)
                     {
                         lastWritedEndIf = true;
+                        if (needWriteEndIf)
+                        {
                         itw.WriteLine("#endif");
                     }
+                        needWriteEndIf = false;
+                    }
+                    if (!ReferenceEquals(ifConditionString, leaf.Condition))
+                    {
+                        needWriteEndIf = true;
                     itw.WriteLine($"#if {leaf.Condition}");
+                }
                 }
                 for (int i = 0; i < leaf.Lines.Length; i++)
                 {

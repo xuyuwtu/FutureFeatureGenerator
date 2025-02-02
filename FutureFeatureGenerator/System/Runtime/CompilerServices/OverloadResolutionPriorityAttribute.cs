@@ -1,5 +1,4 @@
 ﻿namespace System.Runtime.CompilerServices;
-/// <see cref="CSharpFeatureNames.AutomaticProperties"/>
 #if !NET9_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 internal sealed class OverloadResolutionPriorityAttribute : Attribute

@@ -6,7 +6,6 @@ internal static partial class FutureChar
 {
     // NET6_0_OR_GREATER
     #region IsAscii()
-    /// <see cref="CSharpFeatureNames.None"/>
 #if true
     internal static bool IsAscii(char c)
     {
@@ -17,7 +16,6 @@ internal static partial class FutureChar
 
     // NET7_0_OR_GREATER
     #region IsBetween()
-    /// <see cref="CSharpFeatureNames.None"/>
 #if true
     internal static bool IsBetween(char c, char minInclusive, char maxInclusive)
     {
@@ -28,7 +26,6 @@ internal static partial class FutureChar
 
     // NET7_0_OR_GREATER
     #region IsAsciiDigit()
-    /// <see cref="CSharpFeatureNames.None"/>
     // System.Char.IsBetween()
 #if true
     internal static bool IsAsciiDigit(char c)

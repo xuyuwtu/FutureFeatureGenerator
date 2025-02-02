@@ -5,7 +5,6 @@ internal static partial class FutureArgumentException
 {
     // NET7_0_OR_GREATER
     #region ThrowIfNullOrEmpty()
-    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
@@ -25,7 +24,6 @@ internal static partial class FutureArgumentException
 
     // NET8_0_OR_GREATER
     #region ThrowIfNullOrWhiteSpace()
-    /// <see cref="CSharpFeatureNames.NullableReferenceTypes"/>
     // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true

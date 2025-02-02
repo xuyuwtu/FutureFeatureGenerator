@@ -1,5 +1,4 @@
 ﻿namespace System.Diagnostics.CodeAnalysis;
-/// <see cref="CSharpFeatureNames.AutomaticProperties"/>
 #if !NET5_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
 internal sealed class MemberNotNullAttribute : Attribute

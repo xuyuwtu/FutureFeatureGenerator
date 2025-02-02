@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-using Microsoft.CodeAnalysis.CSharp;
-
 namespace FutureFeatureGenerator;
 [DebuggerDisplay("{Name}")]
 internal abstract class NodeBase
@@ -60,15 +58,15 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
         Children.Add(node);
         return node;
     }
-    public void AddChild(string name, Stream contentStream, int startLine = 2)
+    public void AddChild(string name, Stream contentStream, int skipCount, int startLine)
     {
         ThrowIfExists(name);
-        Children.Add(new TempNodeLeaf(name, this, contentStream, startLine) { Depth = Depth + 1 });
+        Children.Add(new TempNodeLeaf(name, this, contentStream, skipCount, startLine) { Depth = Depth + 1 });
     }
-    public void AddChild(string name, StreamReaderWrapper readerWrapper, int startLine = 2)
+    public void AddChild(string name, StreamReaderWrapper readerWrapper, int skipCount, int startLine)
     {
         ThrowIfExists(name);
-        Children.Add(new TempNodeLeaf(name, this, readerWrapper, startLine) { Depth = Depth + 1 });
+        Children.Add(new TempNodeLeaf(name, this, readerWrapper, skipCount, startLine) { Depth = Depth + 1 });
     }
     public void AddChild(NodeBase node)
     {
@@ -153,12 +151,11 @@ internal class NodeClass : NodeCommon
 }
 internal class TempNodeLeaf : NodeBase
 {
-    public LanguageVersion LanguageVersion;
     public string Condition;
     public List<string> Dependencies = new();
     public List<NodeBase> NodeDependencies = new();
     public List<string> Lines = new();
-    public TempNodeLeaf(string name, NodeBase parent, StreamReaderWrapper readerWrapper, int startLine = 2) : base(name, false, parent)
+    public TempNodeLeaf(string name, NodeBase parent, StreamReaderWrapper readerWrapper, int skipCount, int startLine) : base(name, false, parent)
     {
         const int ReadDependencies = 0, ReadCondition = 1, ReadLine = 2, EndCondition = 3;
         var state = 0;
@@ -166,20 +163,7 @@ internal class TempNodeLeaf : NodeBase
         {
             readerWrapper.ReadLine();
         }
-        string? text = readerWrapper.ReadLine();
-        var skipCount = text.IndexOf('/');
-        var versionText = text.AsSpan(skipCount + "//".Length);
-        /*
-          // <versionText> or <featureName>
-
-          /// <see cref="CSharpFeatureNames.<featureName>"/>
-        */
-        if (versionText[0] == '/') 
-        {
-            var startIndex = versionText.IndexOf('.') + 1;
-            versionText = versionText.Slice(startIndex, versionText.Slice(startIndex).IndexOf('"'));
-        }
-        LanguageVersion = Utils.GetLanguageVersion(versionText.Trim());
+        string? text;
         var ifCount = 0;
         while (!readerWrapper.EndOfStream)
         {
@@ -251,18 +235,17 @@ internal class TempNodeLeaf : NodeBase
         // resolve null warn
         Condition ??= "";
     }
-    public TempNodeLeaf(string name, NodeBase parent, Stream contentStream, int startLine) : this(name, parent, new StreamReader(contentStream).GetWrapper(), startLine)
+    public TempNodeLeaf(string name, NodeBase parent, Stream contentStream, int skipCount, int startLine) : this(name, parent, new StreamReader(contentStream).GetWrapper(), skipCount, startLine)
     {
     }
     public NodeLeaf GetNodeLeaf(StringCache condititonCache, NodeLeaf[] dependencies)
     {
-        return new NodeLeaf(Name, Parent!, condititonCache.GetOrAdd(Condition), dependencies, Lines.ToArray()) { Depth = Depth, LanguageVersion = LanguageVersion };
+        return new NodeLeaf(Name, Parent!, condititonCache.GetOrAdd(Condition), dependencies, Lines.ToArray()) { Depth = Depth };
     }
 }
 internal class NodeLeaf : NodeBase
 {
     private static readonly Dictionary<string, Func<string[], bool>> condititonFuncCache = new();
-    public LanguageVersion LanguageVersion;
     public string Condition;
     public Func<string[], bool> ConditionFunc;
     public NodeLeaf[] Dependencies;
@@ -281,7 +264,7 @@ internal class NodeLeaf : NodeBase
         Dependencies = dependencies;
         Lines = lines;
     }
-    public NodeLeaf CloneWithNewParent(NodeBase parent) => new(Name, parent, Condition, Dependencies, Lines) { Depth = Depth, LanguageVersion = LanguageVersion, Order = Order, ModiferLineIndex = ModiferLineIndex };
+    public NodeLeaf CloneWithNewParent(NodeBase parent) => new(Name, parent, Condition, Dependencies, Lines) { Depth = Depth, Order = Order, ModiferLineIndex = ModiferLineIndex };
 }
 internal class NodeEqualityComparer : IEqualityComparer<NodeBase>
 {

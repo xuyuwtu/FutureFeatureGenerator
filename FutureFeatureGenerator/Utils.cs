@@ -10,44 +10,6 @@ internal static class Utils
 {
     public static readonly char[] PointSeparator = new char[] { '.' };
     public static readonly char[] SpaceSeparator = new char[] { ' ' };
-    public static LanguageVersion GetLanguageVersion(ReadOnlySpan<char> version)
-    {
-        return GetLanguageVersionByFeature(version) ?? version switch
-        {
-            "1" => LanguageVersion.CSharp1,
-            "2" => LanguageVersion.CSharp2,
-            "3" => LanguageVersion.CSharp3,
-            "4" => LanguageVersion.CSharp4,
-            "5" => LanguageVersion.CSharp5,
-            "6" => LanguageVersion.CSharp6,
-            "7.0" => LanguageVersion.CSharp7,
-            "7.1" => LanguageVersion.CSharp7_1,
-            "7.2" => LanguageVersion.CSharp7_2,
-            "7.3" => LanguageVersion.CSharp7_3,
-            "8.0" => LanguageVersion.CSharp8,
-            "9.0" => LanguageVersion.CSharp9,
-            "10.0" => (LanguageVersion)1000,
-            "11.0" => (LanguageVersion)1100,
-            "12.0" => (LanguageVersion)1200,
-            "13.0" => (LanguageVersion)1300,
-            _ => throw new ArgumentException($"invalide version '{version.ToString()}'"),
-        };
-    }
-    private static LanguageVersion? GetLanguageVersionByFeature(ReadOnlySpan<char> feature)
-    {
-        return feature switch
-        {
-            CSharpFeatureNames.None => LanguageVersion.CSharp1,
-            CSharpFeatureNames.GenericSupport => LanguageVersion.CSharp2,
-            CSharpFeatureNames.PartialClasses => LanguageVersion.CSharp2,
-            CSharpFeatureNames.AutomaticProperties => LanguageVersion.CSharp3,
-            CSharpFeatureNames.ExtensionMethods => LanguageVersion.CSharp3,
-            CSharpFeatureNames.InModifiers => LanguageVersion.CSharp7_2,
-            CSharpFeatureNames.IntroduceReadonly => LanguageVersion.CSharp7_2,
-            CSharpFeatureNames.NullableReferenceTypes => LanguageVersion.CSharp8,
-            _ => null
-        };
-    }
     public static int GetNumberFromSingleLineComment(string s)
     {
         var startIndex = s.IndexOf(' ', "//".Length);

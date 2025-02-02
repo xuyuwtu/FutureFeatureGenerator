@@ -24,7 +24,7 @@ Each level of indentation is defined by 1 `Tab` or 4 `Spaces`. Adjacent levels a
 
 You can write * on the first line of the file, which will include all types.
 
-Each type has a version language version requirement, and if the set language version is not met, the corresponding code will not be generated. Each type has its own #if conditional compilation, and it will also check for `public` type definitions in all referenced assemblies. If the names match exactly, the code for that type will not be generated.
+Each type has its own #if conditional compilation, and it will also check for `public` type definitions in all referenced assemblies. If the names match exactly, the code for that type will not be generated.
 
 The default modifier is `internal`. If you want to change it to public, simply add a space and the word `public` after the type you wish to modify.
 
@@ -45,24 +45,18 @@ Provide the following types and methods:
 ```
 System
     Diagnostics.CodeAnalysis
-;       8.0
         AllowNullAttribute
         DisallowNullAttribute
         DoesNotReturnAttribute
         DoesNotReturnIfAttribute
-;       12.0
         ExperimentalAttribute
-;       8.0
         MaybeNullAttribute
         MaybeNullWhenAttribute
-;       9.0
         MemberNotNullAttribute
         MemberNotNullWhenAttribute
-;       8.0
         NotNullAttribute
         NotNullIfNotNullAttribute
         NotNullWhenAttribute
-        ; 11.0
         StringSyntaxAttribute
     IO
         Stream
@@ -71,24 +65,16 @@ System
             ;Write(ReadOnlySpan<byte>)
             Write()
     Reflection
-;       5
         AssemblyMetadataAttribute
     Runtime.CompilerServices
-;       10.0
         CallerArgumentExpressionAttribute
-;       5
         CallerFilePathAttribute
         CallerLineNumberAttribute
         CallerMemberNameAttribute
-;       11.0
         CompilerFeatureRequiredAttribute
-;       9.0
         IsExternalInit
-;       13.0
         OverloadResolutionPriorityAttribute
-;       11.0
         RequiredMemberAttribute
-    ; 10.0
     ; FutureArgumentException
     ArgumentException
         ThrowIfNullOrEmpty()
@@ -96,7 +82,6 @@ System
     ; FutureArgumentNullException
     ArgumentNullException
         ThrowIfNull()
-    ; 10.0
     ArgumentOutOfRangeException
         ThrowIfEqual()
         ThrowIfNotEqual()
@@ -104,7 +89,6 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
-;   8.0
     Char
         IsAscii()
         IsBetween()

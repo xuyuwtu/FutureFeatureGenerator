@@ -25,7 +25,7 @@ System
 
 可以在文件第一行写`*`，那么会加入所有类型
 
-每个类型有版本语言版本要求，在设置的语言版本不达标时不会生成对应代码，每个类型都有各自的`#if`条件编译，还会检测所有引用的程序集中的`public`类型定义，如果名称完全匹配，那么这个类型也不会生成代码
+每个类型都有各自的`#if`条件编译，还会检测所有引用的程序集中的`public`类型定义，如果名称完全匹配，那么这个类型也不会生成代码
 
 默认修饰符为`internal`，如果想修改为public，那么在要添加的类型后面加上一个空格和`public`
 
@@ -46,24 +46,18 @@ FutureArgumentNullException.ThrowIfNull(arg);
 ```
 System
     Diagnostics.CodeAnalysis
-;       8.0
         AllowNullAttribute
         DisallowNullAttribute
         DoesNotReturnAttribute
         DoesNotReturnIfAttribute
-;       12.0
         ExperimentalAttribute
-;       8.0
         MaybeNullAttribute
         MaybeNullWhenAttribute
-;       9.0
         MemberNotNullAttribute
         MemberNotNullWhenAttribute
-;       8.0
         NotNullAttribute
         NotNullIfNotNullAttribute
         NotNullWhenAttribute
-        ; 11.0
         StringSyntaxAttribute
     IO
         Stream
@@ -72,24 +66,16 @@ System
             ;Write(ReadOnlySpan<byte>)
             Write()
     Reflection
-;       5
         AssemblyMetadataAttribute
     Runtime.CompilerServices
-;       10.0
         CallerArgumentExpressionAttribute
-;       5
         CallerFilePathAttribute
         CallerLineNumberAttribute
         CallerMemberNameAttribute
-;       11.0
         CompilerFeatureRequiredAttribute
-;       9.0
         IsExternalInit
-;       13.0
         OverloadResolutionPriorityAttribute
-;       11.0
         RequiredMemberAttribute
-    ; 10.0
     ; FutureArgumentException
     ArgumentException
         ThrowIfNullOrEmpty()
@@ -97,7 +83,6 @@ System
     ; FutureArgumentNullException
     ArgumentNullException
         ThrowIfNull()
-    ; 10.0
     ArgumentOutOfRangeException
         ThrowIfEqual()
         ThrowIfNotEqual()
@@ -105,7 +90,6 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
-;   8.0
     Char
         IsAscii()
         IsBetween()

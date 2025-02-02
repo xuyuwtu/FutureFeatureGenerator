@@ -1,5 +1,4 @@
 ﻿namespace System;
-/// <see cref="CSharpFeatureNames.IntroduceReadonly"/>
 // System.Index
 // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)

@@ -1,5 +1,4 @@
 ﻿namespace System.Runtime.CompilerServices;
-/// <see cref="CSharpFeatureNames.AutomaticProperties"/>
 #if !NET7_0_OR_GREATER
 [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
 internal sealed class CompilerFeatureRequiredAttribute : Attribute
