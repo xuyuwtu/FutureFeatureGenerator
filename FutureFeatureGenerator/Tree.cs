@@ -210,7 +210,16 @@ internal class TempNodeLeaf : NodeBase
                     }
                     else
                     {
-                        Lines.Add(text.AsSpan(skipCount).ToString());
+                        // #else
+                        if (text[0] == '#')
+                        {
+                            Lines.Add(text);
+                        }
+                        else
+                        {
+                            Lines.Add(text.AsSpan(skipCount).ToString());
+                        }
+
                     }
                     break;
                 case EndCondition:
@@ -223,7 +232,7 @@ internal class TempNodeLeaf : NodeBase
                     throw new NotImplementedException("unknown state");
             }
         }
-        endRead:
+    endRead:
         if (state != EndCondition)
         {
             throw new InvalidDataException("not found '^#endif'");

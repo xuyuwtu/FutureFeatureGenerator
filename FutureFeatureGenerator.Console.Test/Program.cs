@@ -15,10 +15,12 @@ internal class Program
             System.Diagnostics.CodeAnalysis.AllowNullAttribute
             ;Comment
             System
+                Single
+                    *
                 Reflection
                     AssemblyMetadataAttribute
                 Runtime.CompilerServices public
-                    * 
+                    *
                 Diagnostics.CodeAnalysis
                     DisallowNullAttribute public
                 IO
@@ -29,7 +31,7 @@ internal class Program
                     ThrowIfNull() public
             """, FeatureGenerator.FileName)]);
         generatorDriver = generatorDriver.RunGenerators(compilation);
-        var runResult = generatorDriver.GetRunResult(); 
+        var runResult = generatorDriver.GetRunResult();
         var result = runResult.Results[0];
         System.Console.WriteLine(result.GeneratedSources[0].SourceText);
     }
