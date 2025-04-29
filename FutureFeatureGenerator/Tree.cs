@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace FutureFeatureGenerator;
 [DebuggerDisplay("{Name}")]
@@ -175,9 +176,14 @@ internal class TempNodeLeaf : NodeBase
             switch (state)
             {
                 case ReadDependencies:
-                    if (text.AsSpan(skipCount).StartsWith("//".AsSpan()))
+                    var dependencyText = text.AsSpan(skipCount);
+                    if (dependencyText.StartsWith("//".AsSpan()))
                     {
                         Dependencies.Add(text.AsSpan(skipCount + "//".Length).Trim().ToString());
+                    }
+                    else if (dependencyText.StartsWith("[RequireType".AsSpan()))
+                    {
+                        Dependencies.Add(Regex.Match(text, @"nameof\((.*?)\)").Groups[1].Value);
                     }
                     else
                     {

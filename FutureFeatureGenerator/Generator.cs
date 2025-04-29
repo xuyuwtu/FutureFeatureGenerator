@@ -118,7 +118,6 @@ public class FeatureGenerator :
                     text = sr.ReadLine();
                     if (text.StartsWith("    #region"))
                     {
-
                         parent.AddChild(text.Substring("    #region".Length).Trim(), sr, 4, sr.CurrentLine);
                     }
                 }

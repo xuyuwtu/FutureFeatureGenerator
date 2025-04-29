@@ -5,7 +5,7 @@ internal static partial class FutureArgumentOutOfRangeException
 {
     // NET8_0_OR_GREATER
     #region ThrowIfEqual()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IEquatable<T>?
     {
@@ -19,7 +19,7 @@ internal static partial class FutureArgumentOutOfRangeException
 
     // NET8_0_OR_GREATER
     #region ThrowIfNotEqual()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfNotEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IEquatable<T>?
     {
@@ -33,7 +33,7 @@ internal static partial class FutureArgumentOutOfRangeException
 
     // NET8_0_OR_GREATER
     #region ThrowIfGreaterThan()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfGreaterThan<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
     {
@@ -47,7 +47,7 @@ internal static partial class FutureArgumentOutOfRangeException
 
     // NET8_0_OR_GREATER
     #region ThrowIfGreaterThanOrEqual()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfGreaterThanOrEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
     {
@@ -61,7 +61,7 @@ internal static partial class FutureArgumentOutOfRangeException
 
     // NET8_0_OR_GREATER
     #region ThrowIfLessThan()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfLessThan<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
     {
@@ -75,7 +75,7 @@ internal static partial class FutureArgumentOutOfRangeException
 
     // NET8_0_OR_GREATER
     #region ThrowIfLessThanOrEqual()
-    // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
+    [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
 #if true
     internal static void ThrowIfLessThanOrEqual<T>(T value, T other, [Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? paramName = null) where T : IComparable<T>
     {
