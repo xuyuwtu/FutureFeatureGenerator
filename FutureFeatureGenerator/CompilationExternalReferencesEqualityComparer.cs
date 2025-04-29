@@ -33,5 +33,5 @@ internal sealed class CompilationExternalReferencesEqualityComparer : IEqualityC
         }
         return true;
     }
-    public int GetHashCode(Compilation obj) => obj.GetHashCode();
+    public int GetHashCode(Compilation obj) => 0;
 }

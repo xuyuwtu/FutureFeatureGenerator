@@ -5,7 +5,7 @@ internal static partial class FutureArgumentNullException
 {
     // NET6_0_OR_GREATER
     #region ThrowIfNull()
-    // System.Diagnostics.CodeAnalysis.NotNullWhenAttribute
+    // System.Diagnostics.CodeAnalysis.NotNullAttribute
     // System.Runtime.CompilerServices.CallerArgumentExpressionAttribute
 #if true
     internal static void ThrowIfNull([Diagnostics.CodeAnalysis.NotNull] object? argument, [Runtime.CompilerServices.CallerArgumentExpression(nameof(argument))] string? paramName = null)
