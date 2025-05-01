@@ -68,6 +68,16 @@ internal class StreamIndentedTextWriter
             _outStream.Write(TabStringData, 0, TabStringData.Length);
         }
     }
+    public void OpenBrace()
+    {
+        WriteLine('{');
+        Indent++;
+    }
+    public void CloseBrace()
+    {
+        Indent--;
+        WriteLine('}');
+    }
     public override string ToString()
     {
         _outStream.Seek(0, SeekOrigin.Begin);

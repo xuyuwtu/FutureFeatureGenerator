@@ -11,6 +11,7 @@ internal abstract class NodeBase
     public static readonly StringCache NodeNameCache = new();
     public readonly string Name;
     public readonly byte[] NameData;
+    public List<string> Aliases = new();
     public int Depth;
     public bool HasChildren;
     public NodeBase? Parent;
@@ -22,6 +23,7 @@ internal abstract class NodeBase
         Parent = parent;
     }
     public virtual NodeBase? FindNode(string name) => null;
+    public virtual IReadOnlyList<NodeBase>? FindAllNode(string name) => null;
     public bool IsSibling(NodeBase node)
     {
         if (Parent is null || node.Parent is null)
@@ -85,6 +87,22 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
             }
         }
         return null;
+    }
+    public override IReadOnlyList<NodeBase>? FindAllNode(string name)
+    {
+        if(name == "*")
+        {
+            return Children;
+        }
+        List<NodeBase>? result = null;
+        foreach (var child in Children)
+        {
+            if(string.Equals(name, child.Name, StringComparison.OrdinalIgnoreCase) || child.Aliases.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                (result ??= new()).Add(child);
+            }
+        }
+        return result;
     }
     public bool FindNode(string name, [MaybeNullWhen(false)] out NodeBase node)
     {
@@ -279,7 +297,12 @@ internal class NodeLeaf : NodeBase
         Dependencies = dependencies;
         Lines = lines;
     }
-    public NodeLeaf CloneWithNewParent(NodeBase parent) => new(Name, parent, Condition, Dependencies, Lines) { Depth = Depth, Order = Order, ModiferLineIndex = ModiferLineIndex };
+    public NodeLeaf CloneWithNewParent(NodeBase parent)
+    {
+        var result = (NodeLeaf)MemberwiseClone();
+        result.Parent = parent;
+        return result;
+    }
 }
 internal class NodeEqualityComparer : IEqualityComparer<NodeBase>
 {

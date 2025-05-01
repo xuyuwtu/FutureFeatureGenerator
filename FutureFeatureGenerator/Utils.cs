@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq.Expressions;
 
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +11,92 @@ internal static class Utils
 {
     public static readonly char[] PointSeparator = new char[] { '.' };
     public static readonly char[] SpaceSeparator = new char[] { ' ' };
+    public static bool SkipWhileSpaceFirstCharIs(ReadOnlySpan<char> text, char chr)
+    {
+        foreach(var c in text)
+        {
+            if (!char.IsWhiteSpace(c))
+            {
+                return chr == c;
+            }
+        }
+        return false;
+    }
+    public static List<(int start, int length)> Split(this ReadOnlySpan<char> self, params ReadOnlySpan<char> separator)
+    {
+        var result = new List<(int, int)>();
+        var start = 0;
+        while (true)
+        {
+            var sub = self.Slice(start);
+            if (sub.Length == 0)
+            {
+                break;
+            }
+            var length = sub.IndexOfAny(separator);
+            if (length == -1)
+            {
+                result.Add((start, sub.Length));
+                break;
+            }
+            if (length == 0)
+            {
+                start++;
+                continue;
+            }
+            result.Add((start, length));
+            start += length + 1;
+        }
+        return result;
+    }
+    public static List<(int start, int length)> Split(this ReadOnlySpan<char> self, Func<char, bool> func)
+    {
+        var result = new List<(int, int)>();
+        var start = 0;
+        while (true)
+        {
+            var sub = self.Slice(start);
+            if (sub.Length == 0)
+            {
+                break;
+            }
+            var length = sub.IndexOf(func);
+            if (length == -1)
+            {
+                result.Add((start, sub.Length));
+                break;
+            }
+            if (length == 0)
+            {
+                start++;
+                continue;
+            }
+            result.Add((start, length));
+            start += length + 1;
+        }
+        return result;
+    }
+    public static int IndexOf<T>(this ReadOnlySpan<T> self, Func<T, bool> func)
+    {
+        var count = self.Length;
+        for (int i = 0; i < count; i++)
+        {
+            if (func(self[i]))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    public static ReadOnlySpan<T> Slice<T>(this ReadOnlySpan<T> self, (int start, int length) tuple) => self.Slice(tuple.start, tuple.length);
+    public static bool IsNullOrEmpty<T>([NotNullWhen(false)] this IReadOnlyCollection<T>? self)
+    {
+        if(self is null)
+        {
+            return true;
+        }
+        return self.Count == 0;
+    }
     public static int GetNumberFromSingleLineComment(string s)
     {
         var startIndex = s.IndexOf(' ', "//".Length);

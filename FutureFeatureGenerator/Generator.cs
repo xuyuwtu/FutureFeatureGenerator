@@ -79,7 +79,7 @@ public class FeatureGenerator :
                 namespace ...
                 // <CSharpVersion>    
              */
-            var sr = new StreamReader(stream).GetWrapper();
+            using var sr = new StreamReader(stream).GetWrapper();
             var text = sr.ReadLine();
             if (text.StartsWith("//"))
             {
@@ -402,41 +402,15 @@ public class FeatureGenerator :
             {
                 continue;
             }
-            if (i == 0 && line[0] == childrenLeafAllMatchChar)
-            {
-                additionalNodes.AddRange(allLeaf);
-                if (line.Contains(' ') && Array.IndexOf(Modifiers.All, line.Substring(line.IndexOf(' ')).Trim()) is var modIndex && modIndex != -1)
-                {
-                    defaultModifer = Modifiers.All[modIndex];
-                }
-                break;
-            }
-            if (line[0] == commentChar)
+            var lineSpan = line.AsSpan();
+            if (Utils.SkipWhileSpaceFirstCharIs(lineSpan, commentChar))
             {
                 continue;
             }
-            var spaceLength = 0;
-            int j = 0;
-            for (; j < line.Length; j++)
-            {
-                if (line[j] is not ('\t' or ' '))
+            if(!TryGetDepth(lineSpan, out var newDepth))
                 {
-                    break;
-                }
-                if (line[j] == '\t')
-                {
-                    spaceLength += 4;
-                }
-                else
-                {
-                    spaceLength++;
-                }
-            }
-            if (spaceLength % 4 != 0 || line[j] == commentChar)
-            {
                 continue;
             }
-            var newDepth = spaceLength / 4;
             if (depth + 1 != newDepth)
             {
                 if (newDepth > depth)
@@ -444,81 +418,78 @@ public class FeatureGenerator :
                     continue;
                 }
                 var targetCount = newDepth + 1;
-                while (depthNodeCount.Count > targetCount)
-                {
-                    depthNodeCount.Pop();
-                }
-                var depthCount = depthNodeCount.Pop();
-                while (depthNode.Count > depthCount)
+                while (depthNode.Count > targetCount)
                 {
                     depthNode.Pop();
                 }
                 depth = newDepth - 1;
             }
-            depthNodeCount.Push(depthNode.Count);
-            line = line.Trim();
-            var nameList = line.Split(Utils.PointSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var trimedLine = lineSpan.Trim();
             NodeBase? node = depthNode.Peek();
             if (node is null)
             {
                 break;
             }
-            var enumerator = ((IEnumerable<string>)nameList).GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                var spaceIndex = enumerator.Current.IndexOf(' ');
-                var checkName = enumerator.Current;
+            var ranges = trimedLine.Split(char.IsWhiteSpace);
                 string? modifer = null;
-                if (spaceIndex != -1)
+            if (ranges.Count > 1)
                 {
-                    if (Array.IndexOf(Modifiers.All, line.Substring(line.IndexOf(' ')).Trim()) is var modIndex && modIndex != -1)
+                if (Array.IndexOf(Modifiers.All, trimedLine.Slice(ranges[1]).ToString()) is var modIndex && modIndex != -1)
                     {
                         modifer = Modifiers.All[modIndex];
                     }
-                    checkName = checkName.Substring(0, spaceIndex);
+                trimedLine = trimedLine.Slice(ranges[0]);
                 }
-                if (checkName == childrenLeafAllMatchString)
+            var nameList = trimedLine.Split(Utils.PointSeparator);
+            var enumerator = nameList.GetEnumerator();
+            NodeCommon? newDepthNode = null;
+            while (enumerator.MoveNext())
                 {
-                    foreach (var nodeLeaf2 in ((NodeCommon)node).Children.OfType<NodeLeaf>())
+                var checkName = trimedLine.Slice(enumerator.Current).ToString();
+                var nodes = node.FindAllNode(checkName);
+                if (nodes.IsNullOrEmpty())
                     {
-                        additionalNodes.Add(nodeLeaf2);
-                        if (modifer is not null)
-                        {
-                            modifierCache[nodeLeaf2] = modifer;
-                        }
-                    }
                     break;
                 }
-                node = node.FindNode(checkName);
-                if (node is null)
+                foreach (var foundNode in nodes)
                 {
-                    break;
-                }
-                if (node is NodeLeaf nodeLeaf)
+                    if (foundNode is NodeLeaf nodeLeaf)
                 {
                     additionalNodes.Add(nodeLeaf);
                     if (modifer is not null)
                     {
                         modifierCache[nodeLeaf] = modifer;
                     }
-                    break;
+                    }
                 }
-                if (modifer is not null)
+                if (nodes.Count == 1)
                 {
-                    if (node.GetType() == typeof(NodeClass))
+                    node = nodes[0];
+                    newDepthNode = node as NodeCommon;
+                    if (modifer is not null && newDepthNode is not null)
+                {
+                        if (newDepthNode.GetType() == typeof(NodeClass))
                     {
                         modifierCache[node] = modifer;
                     }
                     else
                     {
-                        var common = (NodeCommon)node;
-                        foreach (var children in common.Children)
+                            foreach (var children in newDepthNode.Children)
                         {
                             modifierCache[children] = modifer;
                         }
                     }
                 }
-                depthNode.Push((NodeCommon)node);
+            }
+                else
+                {
+                    newDepthNode = null;
+                    break;
+                }
+            }
+            if (newDepthNode is not null)
+            {
+                depthNode.Push(newDepthNode);
             }
             depth++;
         }
@@ -551,7 +522,7 @@ public class FeatureGenerator :
             {
                 continue;
             }
-            namespaceHandles.AsSpan().Fill(default);
+            namespaceHandles.AsSpan().Clear();
             notNodeTypeNamespaceStringHandle.Clear();
             try
             {
@@ -682,8 +653,7 @@ public class FeatureGenerator :
                         }
                         needWriteEndIf = false;
                     }
-                    itw.Indent--;
-                    itw.WriteLine('}');
+                    itw.CloseBrace();
                 }
                 continue;
             }
@@ -699,8 +669,7 @@ public class FeatureGenerator :
                     needWriteEndIf = false;
                 }
                 itw.WriteLine(nodeCommon.GetText(modifierCache.TryGetValue(nodeCommon, out var modifer) ? modifer : defaultModifer));
-                itw.WriteLine('{');
-                itw.Indent++;
+                itw.OpenBrace();
                 index++;
                 enumerators[index] = nodeCommon.Children.GetEnumerator();
             }
@@ -741,5 +710,33 @@ public class FeatureGenerator :
         }
         var result = itw.ToString();
         context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
+    }
+
+    private static bool TryGetDepth(ReadOnlySpan<char> line, out int depth)
+    {
+        var spaceLength = 0;
+        int j = 0;
+        for (; j < line.Length; j++)
+        {
+            if (line[j] is not ('\t' or ' '))
+            {
+                break;
+            }
+            if (line[j] == '\t')
+            {
+                spaceLength += 4;
+            }
+            else
+            {
+                spaceLength++;
+            }
+        }
+        if (spaceLength % 4 != 0)
+        {
+            depth = 0;
+            return false;
+        }
+        depth = spaceLength / 4;
+        return true;
     }
 }

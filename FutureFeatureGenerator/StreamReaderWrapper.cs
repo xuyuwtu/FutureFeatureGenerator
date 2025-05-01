@@ -2,7 +2,7 @@
 
 namespace FutureFeatureGenerator;
 
-internal class StreamReaderWrapper
+internal class StreamReaderWrapper : IDisposable
 {
     public StreamReader Reader;
     private int _currentLine = 1;
@@ -16,5 +16,10 @@ internal class StreamReaderWrapper
             _currentLine++;
         }
         return Reader.ReadLine();
+    }
+    public void Dispose()
+    {
+        Reader.Dispose();
+        Reader = null!;
     }
 }
