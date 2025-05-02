@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,6 +20,7 @@ public class FeatureGenerator :
     private static readonly StringCache condititonCache = new();
     private static readonly StringCache writeStringCache = new();
     private readonly Dictionary<NodeBase, string> modifierCache = new(new NodeEqualityComparer());
+    private static readonly Regex thisExtensionMatch = new(@"this\s+(.*?)\s+self,\s+");
     public const string FileName = "FutureFeature.txt";
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
@@ -29,6 +31,10 @@ public class FeatureGenerator :
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
     private bool _isIniaialized = false;
+    static FeatureGenerator()
+    {
+        NodeLeaf.TrueCondition = condititonCache.GetOrAdd("true");
+    }
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
 #else
@@ -319,6 +325,11 @@ public class FeatureGenerator :
                     {
                         leaf.Lines[i] = leaf.Lines[i].Substring(Modifiers.Internal.Length).Trim();
                         leaf.ModiferLineIndex = i;
+                        leaf.IsClass = leaf.Lines[i].StartsWith("sealed") || leaf.Lines[i].StartsWith("class");
+                        if (!leaf.IsClass)
+                        {
+                            leaf.IsInstanceExtension = thisExtensionMatch.IsMatch(leaf.Lines[i]);
+                        }
                         isChecked = true;
                     }
                     leaf.Lines[i] = writeStringCache.GetOrAdd(leaf.Lines[i]);

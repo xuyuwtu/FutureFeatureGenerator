@@ -293,11 +293,14 @@ internal class TempNodeLeaf : NodeBase
 internal class NodeLeaf : NodeBase
 {
     private static readonly Dictionary<string, Func<string[], bool>> condititonFuncCache = new();
+    internal static string TrueCondition = null!;
     public string Condition;
     public NodeLeaf[] Dependencies;
     public string[] Lines;
     public int Order;
     public int ModiferLineIndex = -1;
+    public bool IsClass;
+    public bool IsInstanceExtension;
     public NodeLeaf(string name, NodeBase parent, string condition, NodeLeaf[] dependencies, string[] lines) : base(name, false, parent ?? throw new ArgumentNullException(nameof(parent)))
     {
         Condition = condition;
@@ -313,6 +316,22 @@ internal class NodeLeaf : NodeBase
         var result = (NodeLeaf)MemberwiseClone();
         result.Parent = parent;
         return result;
+    }
+    public bool IsConditionTrue(bool real, string[] args)
+    {
+        return condititonFuncCache[GetConditon(real)](args);
+    }
+    public string GetConditon(bool real)
+    {
+        if (!IsClass && !IsInstanceExtension)
+        {
+            if (real)
+            {
+                return Condition;
+            }
+            return TrueCondition;
+        }
+        return Condition;
     }
 }
 internal class NodeEqualityComparer : IEqualityComparer<NodeBase>
