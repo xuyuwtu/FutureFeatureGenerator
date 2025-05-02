@@ -749,6 +749,12 @@ public class FeatureGenerator :
         while (index != -1)
         {
             ref var enumerator = ref enumerators[index];
+            NodeBase? lastNode = null;
+            try
+            {
+                lastNode = enumerator.Current;
+            }
+            catch { }
             if (!enumerator.MoveNext())
             {
                 index--;
@@ -762,6 +768,10 @@ public class FeatureGenerator :
                             itw.WriteLine("#endif");
                         }
                         needWriteEndIf = false;
+                    }
+                    if(useExtensions && lastNode is NodeLeaf { IsClass: false, IsInstanceExtension: false })
+                    {
+                        itw.CloseBrace();
                     }
                     itw.CloseBrace();
                 }
@@ -786,6 +796,11 @@ public class FeatureGenerator :
             else
             {
                 var leaf = (NodeLeaf)enumerator.Current;
+                if (useExtensions && !leaf.IsClass && !leaf.IsInstanceExtension && (lastNode is null || lastNode is NodeLeaf { IsInstanceExtension: true }))
+                {
+                    itw.WriteLine($"extension({leaf.Parent!.Name})");
+                    itw.OpenBrace();
+                }
                 if (lastLeaf is null || !ReferenceEquals(lastLeaf.Parent, leaf.Parent) || !ReferenceEquals(lastLeaf.GetConditon(useRealCondition), leaf.GetConditon(useRealCondition)))
                 {
                     if (!lastWritedEndIf && lastLeaf is not null)

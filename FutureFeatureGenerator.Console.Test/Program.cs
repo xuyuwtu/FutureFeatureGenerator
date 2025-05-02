@@ -12,6 +12,7 @@ internal class Program
         var csharpGeneratorDriver = CSharpGeneratorDriver.Create(new FeatureGenerator());
         var generatorDriver = csharpGeneratorDriver.AddAdditionalTexts([MyText.From(
             """
+            @UseExtensions true
             @UseRealCondition true
             System.Diagnostics.CodeAnalysis.AllowNullAttribute
             ;Comment
