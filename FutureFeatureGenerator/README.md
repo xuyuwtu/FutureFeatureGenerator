@@ -41,6 +41,21 @@ FutureArgumentNullException.ThrowIfNull(arg);
 #endif
 ```
 
+There are two configuration items. `UseExtensions` adds `extensions()` outside `static` methods. `UseRealCondition` uses actual conditions instead of `#if true`. Below is the enabling syntax.
+```
+@UseExtensions true
+@UseRealCondition true
+```
+
+Example:
+```
+@UseExtensions true
+@UseRealCondition true
+System.ArgumentException
+    ThrowIfNullOrEmpty()
+    ThrowIfNullOrWhiteSpace()
+```
+
 Provide the following types and methods:
 ```
 System
@@ -98,4 +113,8 @@ System
     Type
         GetConstructor()
         GetMethod()
+    ObjectDisposedException
+        ;ThrowIf()
+        ThrowIf(Boolean,Object)
+        ThrowIf(Boolean,Type)
 ```

@@ -1,4 +1,7 @@
 ﻿```
+v1.3.0
+添加extensions支持
+
 v1.2.0
 添加 DevelopmentDependency防止传递
 修复 无`FutureFeature.txt`时会生成报错

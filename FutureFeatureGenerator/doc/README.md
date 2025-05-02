@@ -42,6 +42,21 @@ FutureArgumentNullException.ThrowIfNull(arg);
 #endif
 ```
 
+有两个配置项，`UseExtensions`会在`static`方法外加上`extensions()`，`UseRealCondition`则会使用实际的条件而不是`#if true`，下面是启用语法
+```
+@UseExtensions true
+@UseRealCondition true
+```
+
+例如:
+```
+@UseExtensions true
+@UseRealCondition true
+System.ArgumentException
+    ThrowIfNullOrEmpty()
+    ThrowIfNullOrWhiteSpace()
+```
+
 提供以下类型和方法:
 ```
 System
@@ -99,4 +114,8 @@ System
     Type
         GetConstructor()
         GetMethod()
+    ObjectDisposedException
+        ;ThrowIf()
+        ThrowIf(Boolean,Object)
+        ThrowIf(Boolean,Type)
 ```
