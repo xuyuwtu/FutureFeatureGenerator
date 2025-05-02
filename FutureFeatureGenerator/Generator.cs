@@ -28,6 +28,7 @@ public class FeatureGenerator :
     const string settingUseExtensions = "UseExtensions";
     const string settingUseRealCondition = "UseRealCondition";
     private readonly NodeRoot Root = new();
+    private readonly Dictionary<NodeLeaf, int> RealConditionLeafOrder = new();
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
     private bool _isIniaialized = false;
@@ -304,7 +305,22 @@ public class FeatureGenerator :
                     }
                     if (x1 is NodeLeaf && x2 is NodeLeaf)
                     {
-                        return condititonCache.IndexOf(((NodeLeaf)x1).Condition).CompareTo(condititonCache.IndexOf(((NodeLeaf)x2).Condition));
+                        var ll = (NodeLeaf)x1;
+                        var rl = (NodeLeaf)x2;
+                        var i = condititonCache.IndexOf(ll.Condition).CompareTo(condititonCache.IndexOf(rl.Condition));
+                        if(i != 0)
+                        {
+                            return i;
+                        }
+                        if(ll.IsInstanceExtension == rl.IsInstanceExtension)
+                        {
+                            return 0;
+                        }
+                        if(ll.IsInstanceExtension && !rl.IsInstanceExtension)
+                        {
+                            return -1;
+                        }
+                        return 1;
                     }
                     return 0;
                 });
@@ -334,6 +350,56 @@ public class FeatureGenerator :
                     }
                     leaf.Lines[i] = writeStringCache.GetOrAdd(leaf.Lines[i]);
                 }
+            }
+        }
+
+        stack.Clear();
+        stack.Push(Root);
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (current.HasChildren)
+            {
+                var node = (NodeCommon)current;
+                node.Children.Sort(static (x1, x2) =>
+                {
+                    if (x1 is NodeCommon && x2 is NodeLeaf)
+                    {
+                        return -1;
+                    }
+                    if (x1 is NodeLeaf && x2 is NodeCommon)
+                    {
+                        return 1;
+                    }
+                    if (x1 is NodeLeaf && x2 is NodeLeaf)
+                    {
+                        var ll = (NodeLeaf)x1;
+                        var rl = (NodeLeaf)x2;
+                        var i = condititonCache.IndexOf(ll.GetConditon(true)).CompareTo(condititonCache.IndexOf(rl.GetConditon(true)));
+                        if (i != 0)
+                        {
+                            return i;
+                        }
+                        if (ll.IsInstanceExtension == rl.IsInstanceExtension)
+                        {
+                            return 0;
+                        }
+                        if (ll.IsInstanceExtension && !rl.IsInstanceExtension)
+                        {
+                            return -1;
+                        }
+                        return 1;
+                    }
+                    return 0;
+                });
+                foreach (var child in node.Children)
+                {
+                    stack.Push(child);
+    }
+            }
+            else
+            {
+                RealConditionLeafOrder[(NodeLeaf)current] = order++;
             }
         }
     }
@@ -619,11 +685,11 @@ public class FeatureGenerator :
         }
         additionalNodes.Clear();
         var preprocessorSymbolNames = csharpCompilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.ToArray();
-        if (preprocessorSymbolNames is { Length: > 0 })
+        if (!useRealCondition && preprocessorSymbolNames is { Length: > 0 })
         {
             foreach (var node in isNodeClassNodes)
             {
-                if (node.ConditionFunc(preprocessorSymbolNames))
+                if (node.IsConditionTrue(useRealCondition, preprocessorSymbolNames))
                 {
                     additionalNodes.Add(node);
                 }
@@ -642,7 +708,14 @@ public class FeatureGenerator :
             return;
         }
         additionalNodes = additionalNodes.Distinct(ReferenceEqualityComparer<NodeLeaf>.Instance).ToList();
+        if (useRealCondition)
+        {
+            additionalNodes.Sort((x1, x2) => RealConditionLeafOrder[x1].CompareTo(RealConditionLeafOrder[x2]));
+        }
+        else
+        {
         additionalNodes.Sort(static (x1, x2) => x1.Order.CompareTo(x2.Order));
+        }
         var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
         itw.WriteLine("#nullable enable");
         foreach (var additionalNode in additionalNodes)
@@ -666,7 +739,7 @@ public class FeatureGenerator :
             }
             node2.Children.Add(additionalNodes[i].CloneWithNewParent(node2));
         }
-        var enumerators = new List<NodeBase>.Enumerator[additionalNodes.Select(static x => x.Depth).Max()];
+        var enumerators = new List<NodeBase>.Enumerator[additionalNodes.Max(static x => x.Depth)];
         index = 0;
         enumerators[0] = newRoot.GetEnumerator();
         NodeLeaf? lastLeaf = null;
@@ -713,7 +786,7 @@ public class FeatureGenerator :
             else
             {
                 var leaf = (NodeLeaf)enumerator.Current;
-                if (lastLeaf is null || !ReferenceEquals(lastLeaf.Parent, leaf.Parent) || !ReferenceEquals(lastLeaf.Condition, leaf.Condition))
+                if (lastLeaf is null || !ReferenceEquals(lastLeaf.Parent, leaf.Parent) || !ReferenceEquals(lastLeaf.GetConditon(useRealCondition), leaf.GetConditon(useRealCondition)))
                 {
                     if (!lastWritedEndIf && lastLeaf is not null)
                     {
@@ -724,10 +797,10 @@ public class FeatureGenerator :
                         }
                         needWriteEndIf = false;
                     }
-                    if (!ReferenceEquals(ifConditionString, leaf.Condition))
+                    if (!ReferenceEquals(ifConditionString, leaf.GetConditon(useRealCondition)))
                     {
                         needWriteEndIf = true;
-                        itw.WriteLine($"#if {leaf.Condition}");
+                        itw.WriteLine($"#if {leaf.GetConditon(useRealCondition)}");
                     }
                 }
                 for (int i = 0; i < leaf.Lines.Length; i++)
