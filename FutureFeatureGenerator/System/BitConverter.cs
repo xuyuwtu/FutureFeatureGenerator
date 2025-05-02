@@ -5,8 +5,8 @@ namespace System;
 
 internal static partial class FutureBitConverter
 {
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToBoolean()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -22,8 +22,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToChar()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -39,8 +39,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToDouble()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -56,8 +56,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToInt16()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -73,8 +73,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToInt32()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -90,8 +90,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToInt64()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -107,8 +107,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToSingle()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -124,8 +124,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToUInt16()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -141,8 +141,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToUInt32()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -158,8 +158,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region ToUInt64()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -175,8 +175,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(bool)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, bool value)
     {
@@ -190,8 +190,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(char)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, char value)
     {
@@ -205,8 +205,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(double)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, double value)
     {
@@ -220,8 +220,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(short)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, short value)
     {
@@ -235,8 +235,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(int)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, int value)
     {
@@ -250,8 +250,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(long)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, long value)
     {
@@ -265,8 +265,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(float)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, float value)
     {
@@ -280,8 +280,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(ushort)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, ushort value)
     {
@@ -295,8 +295,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(uint)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, uint value)
     {
@@ -310,8 +310,8 @@ internal static partial class FutureBitConverter
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region TryWriteBytes(ulong)
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, ulong value)
     {

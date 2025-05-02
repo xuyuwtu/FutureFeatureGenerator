@@ -4,10 +4,10 @@ namespace System;
 
 internal static partial class FutureObjectDisposedException
 {
-    // NET7_0_OR_GREATER
     #region ThrowIf(Boolean,Object)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
+    [RealCondition("!NET7_0_OR_GREATER")]
 #if true
 #if NET6_0_OR_GREATER
     [Diagnostics.StackTraceHidden]
@@ -22,10 +22,10 @@ internal static partial class FutureObjectDisposedException
 #endif
     #endregion
 
-    // NET7_0_OR_GREATER
     #region ThrowIf(Boolean,Type)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
+    [RealCondition("!NET7_0_OR_GREATER")]
 #if true
 #if NET6_0_OR_GREATER
     [Diagnostics.StackTraceHidden]

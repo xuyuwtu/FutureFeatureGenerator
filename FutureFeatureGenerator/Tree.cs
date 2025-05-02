@@ -184,6 +184,7 @@ internal class TempNodeLeaf : NodeBase
             readerWrapper.ReadLine();
         }
         string? text;
+        string? realCondition = null;
         var ifCount = 0;
         while (!readerWrapper.EndOfStream)
         {
@@ -208,6 +209,10 @@ internal class TempNodeLeaf : NodeBase
                     {
                         AliasName = nameofValueRegex.Match(text).Groups[1].Value + "()";
                     }
+                    else if (dependencyText.StartsWith("[RealCondition".AsSpan()))
+                    {
+                        realCondition = Regex.Match(text, "\"(.*?)\"").Groups[1].Value;
+                    }
                     else
                     {
                         state++;
@@ -216,6 +221,10 @@ internal class TempNodeLeaf : NodeBase
                     break;
                 case ReadCondition:
                     Condition = text.Substring("#if".Length).Trim();
+                    if(realCondition is not null)
+                    {
+                        Condition = realCondition;
+                    }
                     ifCount = 1;
                     state++;
                     break;
@@ -285,7 +294,6 @@ internal class NodeLeaf : NodeBase
 {
     private static readonly Dictionary<string, Func<string[], bool>> condititonFuncCache = new();
     public string Condition;
-    public Func<string[], bool> ConditionFunc;
     public NodeLeaf[] Dependencies;
     public string[] Lines;
     public int Order;
@@ -295,10 +303,8 @@ internal class NodeLeaf : NodeBase
         Condition = condition;
         if (!condititonFuncCache.TryGetValue(condition, out var func))
         {
-            func = Utils.GetConditionFunc(condition);
-            condititonFuncCache.Add(condition, func);
+            condititonFuncCache.Add(condition, Utils.GetConditionFunc(condition));
         }
-        ConditionFunc = func;
         Dependencies = dependencies;
         Lines = lines;
     }

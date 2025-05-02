@@ -4,8 +4,8 @@ namespace System;
 
 internal static partial class FutureChar
 {
-    // NET6_0_OR_GREATER
     #region IsAscii()
+    [RealCondition("!NET6_0_OR_GREATER")]
 #if true
     internal static bool IsAscii(char c)
     {
@@ -14,8 +14,8 @@ internal static partial class FutureChar
 #endif
     #endregion
 
-    // NET7_0_OR_GREATER
     #region IsBetween()
+    [RealCondition("!NET7_0_OR_GREATER")]
 #if true
     internal static bool IsBetween(char c, char minInclusive, char maxInclusive)
     {
@@ -24,9 +24,9 @@ internal static partial class FutureChar
 #endif
     #endregion
 
-    // NET7_0_OR_GREATER
     #region IsAsciiDigit()
     // System.Char.IsBetween()
+    [RealCondition("!NET7_0_OR_GREATER")]
 #if true
     internal static bool IsAsciiDigit(char c)
     {

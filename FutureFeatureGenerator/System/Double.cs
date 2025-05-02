@@ -4,8 +4,8 @@ namespace System;
 
 internal static partial class FutureDouble
 {
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region IsFinite()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -18,8 +18,8 @@ internal static partial class FutureDouble
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region IsNegative()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -31,8 +31,8 @@ internal static partial class FutureDouble
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region IsNormal()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -46,8 +46,8 @@ internal static partial class FutureDouble
 #endif
     #endregion
 
-    // !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     #region IsSubnormal()
+    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

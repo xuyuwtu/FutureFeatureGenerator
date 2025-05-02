@@ -32,6 +32,7 @@
 		<EmbeddedResource Include="System\**\*.cs" />
 		<EmbeddedResource Remove="System\RequireTypeAttribute.cs" />
 		<EmbeddedResource Remove="System\AliasAttribute.cs" />
+		<EmbeddedResource Remove="System\RealConditionAttribute.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(_IsPacking)' == 'true'">

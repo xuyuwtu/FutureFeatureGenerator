@@ -3,10 +3,10 @@
 namespace System;
 internal static partial class FutureArgumentException
 {
-    // NET7_0_OR_GREATER
     #region ThrowIfNullOrEmpty()
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.NotNullAttribute))]
     [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
+    [RealCondition("!NET7_0_OR_GREATER")]
 #if true
     internal static void ThrowIfNullOrEmpty([Diagnostics.CodeAnalysis.NotNull] string? argument, [Runtime.CompilerServices.CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
@@ -22,10 +22,10 @@ internal static partial class FutureArgumentException
 #endif
     #endregion
 
-    // NET8_0_OR_GREATER
     #region ThrowIfNullOrWhiteSpace()
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.NotNullAttribute))]
     [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
+    [RealCondition("!NET8_0_OR_GREATER")]
 #if true
     internal static void ThrowIfNullOrWhiteSpace([Diagnostics.CodeAnalysis.NotNull] string? argument, [Runtime.CompilerServices.CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
