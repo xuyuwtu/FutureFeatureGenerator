@@ -6,13 +6,13 @@ internal static partial class FutureDictionary
 {
     #region TryAdd()
 #if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
-    internal static bool TryAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue value)
+    internal static bool TryAdd<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key, TValue value)
     {
-        if (dict.ContainsKey(key))
+        if (self.ContainsKey(key))
         {
             return false;
         }
-        dict.Add(key, value);
+        self.Add(key, value);
         return true;
     }
 #endif
