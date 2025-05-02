@@ -23,6 +23,8 @@ public class FeatureGenerator :
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
     const string childrenLeafAllMatchString = "*";
+    const string settingUseExtensions = "UseExtensions";
+    const string settingUseRealCondition = "UseRealCondition";
     private readonly NodeRoot Root = new();
     private readonly Dictionary<NodeCommon, string> namespaceCache = new();
     private readonly List<NodeLeaf> allLeaf = new();
@@ -391,7 +393,11 @@ public class FeatureGenerator :
         var additionalNodes = new List<NodeLeaf>();
         var depth = -1;
         var depthNode = new Stack<NodeCommon>();
-        var depthNodeCount = new Stack<int>();
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { settingUseExtensions, bool.FalseString },
+            { settingUseRealCondition, bool.FalseString },
+        };
         depthNode.Push(Root);
         modifierCache.Clear();
         var defaultModifer = Modifiers.Internal;
@@ -405,6 +411,24 @@ public class FeatureGenerator :
             var lineSpan = line.AsSpan();
             if (Utils.SkipWhileSpaceFirstCharIs(lineSpan, commentChar))
             {
+                continue;
+            }
+            if (line[0] == '@')
+            {
+                lineSpan = lineSpan.Slice(1);
+                var tuples = lineSpan.Trim().Split(Utils.SpaceSeparator);
+                if (tuples.Count >= 2)
+                {
+                    var settingName = lineSpan.Slice(tuples[0]);
+                    foreach(var key in settings.Keys)
+                    {
+                        if(settingName.Equals(key.AsSpan(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            settings[key] = lineSpan.Slice(tuples[1]).ToString();
+                            break;
+                        }
+                    }
+                }
                 continue;
             }
             if(!TryGetDepth(lineSpan, out var newDepth))
@@ -493,6 +517,8 @@ public class FeatureGenerator :
             }
             depth++;
         }
+        var useExtensions = settings[settingUseExtensions].Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
+        var useRealCondition = settings[settingUseRealCondition].Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
         var count = additionalNodes.Count;
         for (int i = 0; i < count; i++)
         {
