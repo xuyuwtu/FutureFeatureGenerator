@@ -29,6 +29,8 @@ internal class Program
                         Write() public
                 ArgumentNullException public
                     ThrowIfNull() public
+                ObjectDisposedException
+                    ThrowIf()
             """, FeatureGenerator.FileName)]);
         generatorDriver = generatorDriver.RunGenerators(compilation);
         var runResult = generatorDriver.GetRunResult();

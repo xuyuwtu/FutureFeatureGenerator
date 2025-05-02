@@ -31,6 +31,7 @@
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullWhenAttribute.cs" />
 		<EmbeddedResource Include="System\**\*.cs" />
 		<EmbeddedResource Remove="System\RequireTypeAttribute.cs" />
+		<EmbeddedResource Remove="System\AliasAttribute.cs" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(_IsPacking)' == 'true'">

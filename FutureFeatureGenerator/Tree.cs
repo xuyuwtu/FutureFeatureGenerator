@@ -11,7 +11,7 @@ internal abstract class NodeBase
     public static readonly StringCache NodeNameCache = new();
     public readonly string Name;
     public readonly byte[] NameData;
-    public List<string> Aliases = new();
+    public string? AliasName;
     public int Depth;
     public bool HasChildren;
     public NodeBase? Parent;
@@ -97,7 +97,7 @@ internal class NodeCommon : NodeBase, IEnumerable<NodeBase>
         List<NodeBase>? result = null;
         foreach (var child in Children)
         {
-            if(string.Equals(name, child.Name, StringComparison.OrdinalIgnoreCase) || child.Aliases.Contains(name, StringComparer.OrdinalIgnoreCase))
+            if(string.Equals(name, child.Name, StringComparison.OrdinalIgnoreCase) || string.Equals(name, child.AliasName, StringComparison.OrdinalIgnoreCase))
             {
                 (result ??= new()).Add(child);
             }
@@ -170,6 +170,7 @@ internal class NodeClass : NodeCommon
 }
 internal class TempNodeLeaf : NodeBase
 {
+    private static Regex nameofValueRegex = new Regex(@"nameof\((.*?)\)");
     public string Condition;
     public List<string> Dependencies = new();
     public List<NodeBase> NodeDependencies = new();
@@ -201,7 +202,11 @@ internal class TempNodeLeaf : NodeBase
                     }
                     else if (dependencyText.StartsWith("[RequireType".AsSpan()))
                     {
-                        Dependencies.Add(Regex.Match(text, @"nameof\((.*?)\)").Groups[1].Value);
+                        Dependencies.Add(nameofValueRegex.Match(text).Groups[1].Value);
+                    }
+                    else if (dependencyText.StartsWith("[Alias".AsSpan()))
+                    {
+                        AliasName = nameofValueRegex.Match(text).Groups[1].Value + "()";
                     }
                     else
                     {
@@ -273,7 +278,7 @@ internal class TempNodeLeaf : NodeBase
     }
     public NodeLeaf GetNodeLeaf(StringCache condititonCache, NodeLeaf[] dependencies)
     {
-        return new NodeLeaf(Name, Parent!, condititonCache.GetOrAdd(Condition), dependencies, Lines.ToArray()) { Depth = Depth };
+        return new NodeLeaf(Name, Parent!, condititonCache.GetOrAdd(Condition), dependencies, Lines.ToArray()) { Depth = Depth, AliasName = AliasName };
     }
 }
 internal class NodeLeaf : NodeBase

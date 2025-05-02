@@ -204,9 +204,9 @@ public class FeatureGenerator :
                 }
                 foreach (var dependency in tempLeaf.NodeDependencies)
                 {
-                    if (inDegree.ContainsKey(dependency))
+                    if (inDegree.TryGetValue(dependency, out int value))
                     {
-                        inDegree[dependency]++;
+                        inDegree[dependency] = value + 1;
                     }
                     else
                     {
