@@ -17,10 +17,7 @@ internal class ReferenceList<T> : IList<T> where T : class
         get => list[index];
         set
         {
-            if (value is null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+            FutureArgumentNullException.ThrowIfNull(value);
             if (ReferenceEquals(value, list[index]))
             {
                 return;
@@ -39,10 +36,7 @@ internal class ReferenceList<T> : IList<T> where T : class
 
     public void Add([NotNull] T item)
     {
-        if (item is null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+        FutureArgumentNullException.ThrowIfNull(item);
         if (Contains(item))
         {
             throw new InvalidOperationException("reference is exists");
@@ -54,10 +48,7 @@ internal class ReferenceList<T> : IList<T> where T : class
 
     public bool Contains([NotNullWhen(true)] T item)
     {
-        if (item is null)
-        {
-            return false;
-        }
+        FutureArgumentNullException.ThrowIfNull(item);
         for (int i = 0; i < list.Count; i++)
         {
             if (ReferenceEquals(list[i], item))
@@ -90,10 +81,7 @@ internal class ReferenceList<T> : IList<T> where T : class
 
     public void Insert(int index, [NotNull] T item)
     {
-        if (item is null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+        FutureArgumentNullException.ThrowIfNull(item);
         if (Contains(item))
         {
             throw new InvalidOperationException("reference is exists");

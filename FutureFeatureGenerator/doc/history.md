@@ -1,4 +1,11 @@
 ﻿```
+v1.4.0
+添加 DisableAddDependencies 选项
+添加 无缩进直接搜索终端节点
+修复 extensions 会加到命名空间上的问题
+删除 和程序集类型对比
+
+
 v1.3.0
 添加extensions支持
 

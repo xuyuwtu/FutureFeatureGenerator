@@ -1,8 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis;
@@ -17,24 +17,21 @@ public class FeatureGenerator :
     ISourceGenerator
 #endif
 {
-    private static readonly StringCache condititonCache = new();
-    private static readonly StringCache writeStringCache = new();
-    private readonly Dictionary<NodeBase, string> modifierCache = new(new NodeEqualityComparer());
-    private static readonly Regex thisExtensionMatch = new(@"this\s+(.*?)\s+self,\s+");
+    private static readonly StringCache conditionCache = new();
+    private readonly Dictionary<int, string> modifierCache = [];
+    private static readonly Regex requireTypeMatcher = new(@$"\[{nameof(RequireType)}\(nameof\((.*?)\)\)\]");
     public const string FileName = "FutureFeature.txt";
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
     const string childrenLeafAllMatchString = "*";
-    const string settingUseExtensions = "UseExtensions";
-    const string settingUseRealCondition = "UseRealCondition";
-    private readonly NodeRoot Root = new();
-    private readonly Dictionary<NodeLeaf, int> RealConditionLeafOrder = new();
-    private readonly Dictionary<NodeCommon, string> namespaceCache = new();
-    private readonly List<NodeLeaf> allLeaf = new();
-    private bool _isIniaialized = false;
+    private readonly NodeNamespace Root = new("");
+    private NodeBase[] AllNodes = [];
+    private NodeBase[] AllLeafNodes = [];
+    private string[] NodesFullName = [];
+    private bool _isInitialized = false;
     static FeatureGenerator()
     {
-        NodeLeaf.TrueCondition = condititonCache.GetOrAdd("true");
+        NodeMethod.TrueCondition = conditionCache.GetOrAdd("true");
     }
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -43,17 +40,18 @@ public class FeatureGenerator :
 #endif
     {
 #if UseIIncrementalGenerator
-        context.RegisterSourceOutput(IncrementalValueProviderExtensions.Combine(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect(), context.CompilationProvider.WithComparer(CompilationExternalReferencesEqualityComparer.Instance)), Execute);
+        context.RegisterSourceOutput(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect().Combine(context.CompilationProvider), Execute);
 #endif
-        if (!_isIniaialized)
+        if (!_isInitialized)
         {
             Init();
         }
     }
     private void Init()
     {
-        _isIniaialized = true;
+        _isInitialized = true;
         var assembly = Assembly.GetExecutingAssembly();
+        int id = 0;
         foreach (var resourceName in assembly.GetManifestResourceNames())
         {
             if (!resourceName.EndsWith(".cs"))
@@ -62,344 +60,177 @@ public class FeatureGenerator :
             }
             var names = resourceName.Split(Utils.PointSeparator);
             var count = names.Length - 2;
-            NodeCommon node = Root;
+            HasChildrenNode node = Root;
             for (int i = 0; i < count; i++)
             {
                 var name = names[i];
                 if (node.FindNode(name, out var findNode))
                 {
-                    node = (NodeCommon)findNode;
+                    node = (HasChildrenNode)findNode;
                 }
                 else
                 {
-                    node = node.AddChild(name);
+                    var addNode = new NodeNamespace(name)
+                    {
+                        Id = id++
+                    };
+                    addNode.ThrowIfNotValid();
+                    node.AddChild(addNode);
+                    node = addNode;
                 }
             }
             using var stream = assembly.GetManifestResourceStream(resourceName)!;
             /*
             if is methodClass
-                    #region
-                    #endregion
-                or
-                    // <StartLine> <MethodName>
-                    // ...
-                end when not start with // (namespace ...)
+                #region
+                #endregion
             else
                 namespace ...
-                // <CSharpVersion>    
              */
             using var sr = new StreamReader(stream).GetWrapper();
             var text = sr.ReadLine();
-            if (text.StartsWith("//"))
+            if (text.StartsWith("namespace"))
             {
-                var parent = new NodeClass(names[count], node);
-                node.AddChild(parent);
-                var list = new List<(int startLine, string name)>();
-                do
+                text = sr.ReadLine();
+                Match match;
+                var deps = new List<object>();
+                while ((match = requireTypeMatcher.Match(text)).Success)
                 {
-                    var result = text.Substring("//".Length).Split(Utils.SpaceSeparator, StringSplitOptions.RemoveEmptyEntries);
-                    if (result[0][result[0].Length - 1] == '+')
-                    {
-                        list.Add((-int.Parse(result[0].Remove(result[0].Length - 1)), result[1]));
-                    }
-                    else
-                    {
-                        list.Add((int.Parse(result[0]), result[1]));
-                    }
+                    deps.Add(match.Groups[1].Value);
                     text = sr.ReadLine();
-                } while (text.StartsWith("//"));
-                for (int i = 0; i < list.Count; i++)
-                {
-                    var (startLine, name) = list[i];
-                    if (startLine < 0)
-                    {
-                        startLine = -startLine + list.Count - i - 1;
-                    }
-                    parent.AddChild(name, sr, 4, startLine);
                 }
-            }
-            else if (text.StartsWith("#region"))
-            {
-                var parent = new NodeClass(names[count], node);
-                node.AddChild(parent);
+                if (!text.StartsWith("#if "))
+                {
+                    throw new InvalidDataException($"{resourceName} line:{sr.CurrentLine} must StartWith '#if '");
+                }
+                var condition = conditionCache.GetOrAdd(text.Substring("#if ".Length).Trim());
+                var lines = new List<string>();
+                var modifierIndex = -1;
                 while (!sr.EndOfStream)
                 {
                     text = sr.ReadLine();
-                    if (text.StartsWith("    #region"))
+                    if (text.StartsWith(Modifiers.Internal))
                     {
-                        parent.AddChild(text.Substring("    #region".Length).Trim(), sr, 4, sr.CurrentLine);
-                    }
-                }
-            }
-            else
-            {
-                node.AddChild(names[count], sr, 0, 2);
-            }
-        }
-        var hasDependencyLeaf = new List<TempNodeLeaf>();
-        var tempAllLeaf = new List<NodeBase>();
-        var nodeQueue = new Queue<NodeBase>();
-        nodeQueue.Enqueue(Root);
-        while (nodeQueue.Count > 0)
-        {
-            var current = nodeQueue.Dequeue();
-            if (current is TempNodeLeaf nodeLeaf)
-            {
-                if (nodeLeaf.Dependencies.Count == 0)
-                {
-                    var leaf = nodeLeaf.GetNodeLeaf(condititonCache, Array.Empty<NodeLeaf>());
-                    var list = ((NodeCommon)nodeLeaf.Parent!).Children;
-                    list[list.IndexOf(nodeLeaf)] = leaf;
-                    tempAllLeaf.Add(leaf);
-                }
-                else
-                {
-                    hasDependencyLeaf.Add(nodeLeaf);
-                }
-            }
-            else
-            {
-                foreach (var child in (NodeCommon)current)
-                {
-                    nodeQueue.Enqueue(child);
-                }
-            }
-        }
-        foreach (var nodeLeaf in hasDependencyLeaf)
-        {
-            tempAllLeaf.Add(nodeLeaf);
-            foreach (var dependency in nodeLeaf.Dependencies)
-            {
-                nodeLeaf.NodeDependencies.Add(Root.FindNodeByFullName(dependency) ?? throw new InvalidDataException($"'{dependency}' not found"));
-            }
-        }
-        // [NodeLeaf, ..., TempNodeLeaf, ...]
-        tempAllLeaf.Sort(static (x1, x2) =>
-        {
-            if (x1 is NodeLeaf)
-            {
-                if (x2 is NodeLeaf)
-                {
-                    return 0;
-                }
-                return -1;
-            }
-            if (x1 is TempNodeLeaf)
-            {
-                if (x2 is TempNodeLeaf)
-                {
-                    return ((TempNodeLeaf)x1).Dependencies.Count.CompareTo(((TempNodeLeaf)x2).Dependencies.Count);
-                }
-                return 1;
-            }
-            return 0;
-        });
-        if (tempAllLeaf.Any(static x => x is TempNodeLeaf))
-        {
-            var inDegree = new Dictionary<NodeBase, int>();
-            var queue = new Queue<NodeBase>();
-            var sortedList = new List<NodeBase>();
-
-            foreach (var node in tempAllLeaf)
-            {
-                inDegree[node] = 0;
-            }
-
-            foreach (var node in tempAllLeaf)
-            {
-                if (node is not TempNodeLeaf tempLeaf)
-                {
-                    continue;
-                }
-                foreach (var dependency in tempLeaf.NodeDependencies)
-                {
-                    if (inDegree.TryGetValue(dependency, out int value))
-                    {
-                        inDegree[dependency] = value + 1;
+                        lines.Add(text.Substring(Modifiers.Internal.Length + 1));
+                        modifierIndex = lines.Count - 1;
                     }
                     else
                     {
-                        inDegree[dependency] = 1;
+                        lines.Add(text);
                     }
                 }
-            }
-
-            foreach (var node in inDegree)
-            {
-                if (node.Value == 0)
+                while (true)
                 {
-                    queue.Enqueue(node.Key);
-                }
-            }
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                sortedList.Add(current);
-                if (current is TempNodeLeaf nodeLeaf)
-                {
-                    foreach (var dependency in nodeLeaf.NodeDependencies)
+                    if (string.IsNullOrEmpty(lines[lines.Count - 1]))
                     {
-                        inDegree[dependency]--;
-                        if (inDegree[dependency] == 0)
-                        {
-                            queue.Enqueue(dependency);
-                        }
+                        lines.RemoveAt(lines.Count - 1);
                     }
-                }
-            }
-            if (sortedList.Count != tempAllLeaf.Count)
-            {
-                throw new InvalidOperationException("Graph has cycles, topological sorting is not possible.");
-            }
-            for (int i = sortedList.Count - 1; i >= 0; i--)
-            {
-                if (sortedList[i] is TempNodeLeaf nodeLeaf)
-                {
-                    var dependencies = new NodeLeaf[nodeLeaf.Dependencies.Count];
-                    for (int j = 0; j < dependencies.Length; j++)
+                    if (lines[lines.Count - 1].StartsWith("#endif"))
                     {
-                        dependencies[j] = Root.FindNodeByFullName(nodeLeaf.Dependencies[j]) as NodeLeaf ?? throw new InvalidDataException($"'{nodeLeaf.Dependencies[j]}' as NodeLeaf not found");
+                        lines.RemoveAt(lines.Count - 1);
+                        break;
                     }
-                    var list = ((NodeCommon)nodeLeaf.Parent!).Children;
-                    list[list.IndexOf(nodeLeaf)] = nodeLeaf.GetNodeLeaf(condititonCache, dependencies);
                 }
+                var nodeClass = new NodeClass(condition, names[count])
+                {
+                    ModifierLineIndex = modifierIndex,
+                    Dependencies = [.. deps],
+                    IsMaster = true,
+                    Lines = [.. lines],
+                    Id = id++
+                };
+                node.AddChild(nodeClass);
+            }
+            else if (text.StartsWith("#region"))
+            {
+                var nodeClass = new NodeClass(conditionCache.GetOrAdd(""), names[count])
+                {
+                    Id = id++
+                };
+                node.AddChild(nodeClass);
+                while (!sr.EndOfStream)
+                {
+                    text = sr.ReadLine();
+                    //if(char.IsWhiteSpace(text[0]) && text.Substring(text.IndexOf('#'), "#region".Length) == "#region")
+                    if (text.StartsWith("    #region"))
+                    {
+                        var nodeMethod = Utils.GetMethodNode(text.Substring("    #region".Length).Trim(), sr, 4, sr.CurrentLine);
+                        nodeMethod.Condition = conditionCache.GetOrAdd(nodeMethod.Condition);
+                        nodeMethod.Id = id++;
+                        nodeClass.AddChild(nodeMethod);
+                    }
+                }
+            }
+            else
+            {
+                throw new Exception();
             }
         }
-        var order = 0;
         var stack = new Stack<NodeBase>();
         stack.Push(Root);
-        while (stack.Count > 0)
+        var allNodes = new List<NodeBase>();
+        while(stack.Count > 0)
         {
-            var current = stack.Pop();
-            if (current.HasChildren)
+            var node = stack.Pop();
+            allNodes.Add(node);
+            object[]? dependencies = null;
+            if (node is NodeClass nodeClass)
             {
-                var node = (NodeCommon)current;
-                var names = new string[node.Depth];
-                if (node.Depth != 0)
+                dependencies = nodeClass.Dependencies;
+            }
+            else if (node is NodeMethod nodeMethod)
+            {
+                dependencies = nodeMethod.Dependencies;
+            }
+            if (dependencies is not null)
+            {
+                for (int i = 0; i < dependencies.Length; i++)
                 {
-                    var index = node.Depth;
-                    var tempNode = node;
-                    while (index-- > 0)
+                    var dep = (string)dependencies[i];
+                    if (Root.FindFullNameNode(dep, out var depNode))
                     {
-                        names[index] = tempNode!.Name;
-                        tempNode = tempNode.Parent as NodeCommon;
+                        dependencies[i] = depNode;
                     }
-                    namespaceCache.Add(node, string.Join(".", names));
-                }
-                // [NodeCommon, ..., NodeLeaf, ...]
-                // if condition is:
-                // NodeLeaf1 true
-                // NodeLeaf2 false
-                // NodeLeaf3 true
-                // => [NodeLeaf1 { Order = 0 }, NodeLeaf3 { Order = 1 }, NodeLeaf2 { Order = 2 }]
-                node.Children.Sort(static (x1, x2) =>
-                {
-                    if (x1 is NodeCommon && x2 is NodeLeaf)
+                    else
                     {
-                        return -1;
+                        throw new Exception($"'{dep}' not found in tree");
                     }
-                    if (x1 is NodeLeaf && x2 is NodeCommon)
-                    {
-                        return 1;
-                    }
-                    if (x1 is NodeLeaf && x2 is NodeLeaf)
-                    {
-                        var ll = (NodeLeaf)x1;
-                        var rl = (NodeLeaf)x2;
-                        var i = condititonCache.IndexOf(ll.Condition).CompareTo(condititonCache.IndexOf(rl.Condition));
-                        if(i != 0)
-                        {
-                            return i;
-                        }
-                        if(ll.IsInstanceExtension == rl.IsInstanceExtension)
-                        {
-                            return 0;
-                        }
-                        if(ll.IsInstanceExtension && !rl.IsInstanceExtension)
-                        {
-                            return -1;
-                        }
-                        return 1;
-                    }
-                    return 0;
-                });
-                foreach (var child in node.Children)
-                {
-                    stack.Push(child);
                 }
             }
-            else
+            if (node is HasChildrenNode namedNode)
             {
-                var leaf = (NodeLeaf)current;
-                leaf.Order = order++;
-                allLeaf.Add(leaf);
-                var isChecked = false;
-                for (int i = 0; i < leaf.Lines.Length; i++)
+                foreach (var child in namedNode.Children)
                 {
-                    if (!isChecked && leaf.Lines[i].StartsWith(Modifiers.Internal))
-                    {
-                        leaf.Lines[i] = leaf.Lines[i].Substring(Modifiers.Internal.Length).Trim();
-                        leaf.ModiferLineIndex = i;
-                        leaf.IsClass = leaf.Lines[i].StartsWith("sealed") || leaf.Lines[i].StartsWith("class");
-                        if (!leaf.IsClass)
-                        {
-                            leaf.IsInstanceExtension = thisExtensionMatch.IsMatch(leaf.Lines[i]);
-                        }
-                        isChecked = true;
-                    }
-                    leaf.Lines[i] = writeStringCache.GetOrAdd(leaf.Lines[i]);
+                    stack.Push(child);
                 }
             }
         }
-
-        stack.Clear();
-        stack.Push(Root);
-        while (stack.Count > 0)
+        // remove Root
+        allNodes.RemoveAt(0);
+        allNodes.Sort(static (x, y) => x.Id.CompareTo(y.Id));
+        AllNodes = [.. allNodes];
+        AllLeafNodes = [.. allNodes.Where(x => x.IsLeaf)];
+        NodesFullName = new string[AllNodes.Length];
+        for (int i = 0; i < AllNodes.Length; i++)
         {
-            var current = stack.Pop();
-            if (current.HasChildren)
+            NodesFullName[i] = AllNodes[i].ParentId == -1 ? AllNodes[i].Name : NodesFullName[AllNodes[i].ParentId] + "." + AllNodes[i].Name;
+        }
+        foreach (var node in AllLeafNodes)
+        {
+            switch (node)
             {
-                var node = (NodeCommon)current;
-                node.Children.Sort(static (x1, x2) =>
-                {
-                    if (x1 is NodeCommon && x2 is NodeLeaf)
+                case NodeClass nodeClass:
+                    if (!conditionCache.Exists(nodeClass.Condition))
                     {
-                        return -1;
+                        throw new Exception($"condition '{nodeClass.Condition}' not at conditionCache");
                     }
-                    if (x1 is NodeLeaf && x2 is NodeCommon)
+                    break;
+                case NodeMethod nodeMethod:
+                    if (!conditionCache.Exists(nodeMethod.Condition))
                     {
-                        return 1;
+                        throw new Exception($"condition '{nodeMethod.Condition}' not at conditionCache");
                     }
-                    if (x1 is NodeLeaf && x2 is NodeLeaf)
-                    {
-                        var ll = (NodeLeaf)x1;
-                        var rl = (NodeLeaf)x2;
-                        var i = condititonCache.IndexOf(ll.GetConditon(true)).CompareTo(condititonCache.IndexOf(rl.GetConditon(true)));
-                        if (i != 0)
-                        {
-                            return i;
-                        }
-                        if (ll.IsInstanceExtension == rl.IsInstanceExtension)
-                        {
-                            return 0;
-                        }
-                        if (ll.IsInstanceExtension && !rl.IsInstanceExtension)
-                        {
-                            return -1;
-                        }
-                        return 1;
-                    }
-                    return 0;
-                });
-                foreach (var child in node.Children)
-                {
-                    stack.Push(child);
-    }
-            }
-            else
-            {
-                RealConditionLeafOrder[(NodeLeaf)current] = order++;
+                    break;
             }
         }
     }
@@ -466,18 +297,13 @@ public class FeatureGenerator :
         {
             return;
         }
-        var memoryStream = new MemoryStream();
-        var additionalNodes = new List<NodeLeaf>();
+        var additionalNodes = new List<NodeBase>();
+        var additionalNodesFromAll = false;
         var depth = -1;
-        var depthNode = new Stack<NodeCommon>();
-        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            { settingUseExtensions, bool.FalseString },
-            { settingUseRealCondition, bool.FalseString },
-        };
+        var depthNode = new Stack<HasChildrenNode>();
+        var options = new Options();
         depthNode.Push(Root);
         modifierCache.Clear();
-        var defaultModifer = Modifiers.Internal;
         for (int i = 0; i < lines.Length; i++)
         {
             var line = lines[i];
@@ -492,24 +318,18 @@ public class FeatureGenerator :
             }
             if (line[0] == '@')
             {
-                lineSpan = lineSpan.Slice(1);
-                var tuples = lineSpan.Trim().Split(Utils.SpaceSeparator);
-                if (tuples.Count >= 2)
-                {
-                    var settingName = lineSpan.Slice(tuples[0]);
-                    foreach(var key in settings.Keys)
-                    {
-                        if(settingName.Equals(key.AsSpan(), StringComparison.OrdinalIgnoreCase))
-                        {
-                            settings[key] = lineSpan.Slice(tuples[1]).ToString();
-                            break;
-                        }
-                    }
-                }
+                options.ExecuteChange(lineSpan.Slice(1));
                 continue;
             }
-            if(!TryGetDepth(lineSpan, out var newDepth))
-                {
+            if (line[0] == '*')
+            {
+                additionalNodes.Clear();
+                additionalNodes.AddRange(AllLeafNodes);
+                additionalNodesFromAll = true;
+                break;
+            }
+            if (!TryGetDepth(lineSpan, out var newDepth))
+            {
                 continue;
             }
             if (depth + 1 != newDepth)
@@ -525,66 +345,65 @@ public class FeatureGenerator :
                 }
                 depth = newDepth - 1;
             }
-            var trimedLine = lineSpan.Trim();
+            var trimmedLine = lineSpan.Trim();
             NodeBase? node = depthNode.Peek();
             if (node is null)
             {
                 break;
             }
-            var ranges = trimedLine.Split(char.IsWhiteSpace);
-                string? modifer = null;
+            var ranges = trimmedLine.Split(char.IsWhiteSpace);
+            string? modifier = null;
             if (ranges.Count > 1)
+            {
+                if (Array.IndexOf(Modifiers.All, trimmedLine.Slice(ranges[1]).ToString()) is var modIndex && modIndex != -1)
                 {
-                if (Array.IndexOf(Modifiers.All, trimedLine.Slice(ranges[1]).ToString()) is var modIndex && modIndex != -1)
-                    {
-                        modifer = Modifiers.All[modIndex];
-                    }
-                trimedLine = trimedLine.Slice(ranges[0]);
+                    modifier = Modifiers.All[modIndex];
                 }
-            var nameList = trimedLine.Split(Utils.PointSeparator);
+                trimmedLine = trimmedLine.Slice(ranges[0]);
+            }
+            var nameList = trimmedLine.Split(Utils.PointSeparator);
+            if(newDepth == 0 && nameList.Count == 1)
+            {
+                var checkName = trimmedLine.Slice(nameList[0]).ToString();
+                var nodes = AllLeafNodes.Where(x => string.Equals(checkName, x.Name) || string.Equals(checkName, x.AliasName));
+                if (nodes.Any())
+                {
+                    additionalNodes.AddRange(nodes);
+                    continue;
+                }
+            }
             var enumerator = nameList.GetEnumerator();
-            NodeCommon? newDepthNode = null;
+            HasChildrenNode? newDepthNode = null;
             while (enumerator.MoveNext())
-                {
-                var checkName = trimedLine.Slice(enumerator.Current).ToString();
-                var nodes = node.FindAllNode(checkName);
+            {
+                var checkName = trimmedLine.Slice(enumerator.Current).ToString();
+                var nodes = (node as HasChildrenNode)?.FindAllNode(checkName);
                 if (nodes.IsNullOrEmpty())
-                    {
+                {
                     break;
-                }
-                foreach (var foundNode in nodes)
-                {
-                    if (foundNode is NodeLeaf nodeLeaf)
-                {
-                    additionalNodes.Add(nodeLeaf);
-                    if (modifer is not null)
-                    {
-                        modifierCache[nodeLeaf] = modifer;
-                    }
-                    }
                 }
                 if (nodes.Count == 1)
                 {
                     node = nodes[0];
-                    newDepthNode = node as NodeCommon;
-                    if (modifer is not null && newDepthNode is not null)
-                {
-                        if (newDepthNode.GetType() == typeof(NodeClass))
+                    newDepthNode = node as HasChildrenNode;
+                    if (modifier is not null)
                     {
-                        modifierCache[node] = modifer;
-                    }
-                    else
-                    {
-                            foreach (var children in newDepthNode.Children)
-                        {
-                            modifierCache[children] = modifer;
-                        }
+                        modifierCache[node.Id] = modifier;
                     }
                 }
-            }
                 else
                 {
                     newDepthNode = null;
+                }
+                foreach (var foundNode in nodes)
+                {
+                    if (foundNode.IsLeaf)
+                    {
+                        additionalNodes.Add(foundNode);
+                    }
+                }
+                if(newDepthNode is null)
+                {
                     break;
                 }
             }
@@ -594,246 +413,52 @@ public class FeatureGenerator :
             }
             depth++;
         }
-        var useExtensions = settings[settingUseExtensions].Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
-        var useRealCondition = settings[settingUseRealCondition].Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
-        var count = additionalNodes.Count;
-        for (int i = 0; i < count; i++)
+        if (!additionalNodesFromAll && !options.DisableAddDependencies)
         {
-            additionalNodes.AddRange(additionalNodes[i].Dependencies);
+            var count = additionalNodes.Count;
+            for (int i = 0; i < count; i++)
+            {
+                additionalNodes.AddRange(additionalNodes[i].GetDependencies());
+            }
+            additionalNodes = additionalNodes.Distinct(ReferenceEqualityComparer<NodeBase>.Instance).ToList();
         }
-        var groups = additionalNodes.Where(static x => x.Parent is not NodeClass).Distinct().GroupBy(x => namespaceCache[(NodeCommon)x.Parent!], static x => x, ReferenceEqualityComparer<string>.Instance);
-        var isNodeClassNodes = additionalNodes.Where(static x => x.Parent is NodeClass).Distinct().ToArray();
-        var namespaceTexts = new string[groups.Count()];
-        var namespaceGroup = new List<NodeLeaf>[namespaceTexts.Length];
-        var index = 0;
-        foreach (var group in groups)
-        {
-            namespaceTexts[index] = group.Key;
-            namespaceGroup[index] = group.ToList();
-            index++;
-        }
-        var namespaceHandles = new StringHandle[namespaceTexts.Length];
-        var notNodeTypeNamespaceStringHandle = new List<StringHandle>();
-        var checkReference = true;
-        foreach (MetadataReference reference in compilation.ExternalReferences)
-        {
-            if (!checkReference)
-            {
-                break;
-            }
-            if (reference is not PortableExecutableReference executableReference || executableReference.FilePath is null || executableReference.GetMetadata().Kind != MetadataImageKind.Assembly)
-            {
-                continue;
-            }
-            namespaceHandles.AsSpan().Clear();
-            notNodeTypeNamespaceStringHandle.Clear();
-            try
-            {
-                using var peStream = File.OpenRead(executableReference.FilePath);
-                var peReader = new PEReader(peStream);
-                if (!peReader.HasMetadata)
-                {
-                    continue;
-                }
-                var mtReader = peReader.GetMetadataReader();
-                foreach (var typeDefinitionHandle in mtReader.TypeDefinitions)
-                {
-                    var typeDefinition = mtReader.GetTypeDefinition(typeDefinitionHandle);
-                    if ((typeDefinition.Attributes & TypeAttributes.VisibilityMask) != TypeAttributes.Public)
-                    {
-                        continue;
-                    }
-                    if (notNodeTypeNamespaceStringHandle.Contains(typeDefinition.Namespace))
-                    {
-                        continue;
-                    }
-                    var i = Array.IndexOf(namespaceHandles, typeDefinition.Namespace);
-                    if (i == -1)
-                    {
-                        var nameSpace = mtReader.GetString(typeDefinition.Namespace);
-                        i = Array.IndexOf(namespaceTexts, nameSpace);
-                        if (i == -1)
-                        {
-                            notNodeTypeNamespaceStringHandle.Add(typeDefinition.Namespace);
-                            continue;
-                        }
-                        namespaceHandles[i] = typeDefinition.Namespace;
-                    }
-                    var blobReader = mtReader.GetBlobReader(typeDefinition.Name);
-                    var name = new Span<byte>(blobReader.StartPointer, blobReader.Length);
-                    int removeIndex = -1;
-                    var groupNodes = namespaceGroup[i];
-                    for (int j = 0; j < groupNodes.Count; j++)
-                    {
-                        var node = groupNodes[j];
-                        if (name.SequenceEqual(node.NameData))
-                        {
-                            removeIndex = j;
-                            break;
-                        }
-                    }
-                    if (removeIndex != -1)
-                    {
-                        groupNodes.RemoveAt(removeIndex);
-                    }
-                }
-            }
-            catch
-            {
-                checkReference = false;
-            }
-        }
-        additionalNodes.Clear();
         var preprocessorSymbolNames = csharpCompilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.ToArray();
-        if (!useRealCondition && preprocessorSymbolNames is { Length: > 0 })
+        if (options.UseRealCondition && preprocessorSymbolNames is { Length: > 0 })
         {
-            foreach (var node in isNodeClassNodes)
+            var count = additionalNodes.Count;
+            var offset = 0;
+            for (int i = 0; i < count; i++)
             {
-                if (node.IsConditionTrue(useRealCondition, preprocessorSymbolNames))
+                var index = i + offset;
+                var node = additionalNodes[index];
+                if(node is NodeMethod nodeMethod && !nodeMethod.IsConditionTrue(options.UseRealCondition, preprocessorSymbolNames))
                 {
-                    additionalNodes.Add(node);
+                    additionalNodes.RemoveAt(index);
+                    offset--;
+                }
+                else if(node is NodeClass nodeClass && !nodeClass.IsConditionTrue(preprocessorSymbolNames))
+                {
+                    additionalNodes.RemoveAt(index);
+                    offset--;
                 }
             }
-        }
-        else
-        {
-            additionalNodes.AddRange(isNodeClassNodes);
-        }
-        foreach (var nodes in namespaceGroup)
-        {
-            additionalNodes.AddRange(nodes);
         }
         if (additionalNodes.Count == 0)
         {
             return;
         }
-        additionalNodes = additionalNodes.Distinct(ReferenceEqualityComparer<NodeLeaf>.Instance).ToList();
-        if (useRealCondition)
-        {
-            additionalNodes.Sort((x1, x2) => RealConditionLeafOrder[x1].CompareTo(RealConditionLeafOrder[x2]));
-        }
-        else
-        {
-        additionalNodes.Sort(static (x1, x2) => x1.Order.CompareTo(x2.Order));
-        }
-        var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
+        //var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
+        var memoryStream = new MemoryStream();
+        var itw = new IndentedTextWriter(new StreamWriter(memoryStream) { AutoFlush = true });
         itw.WriteLine("#nullable enable");
         foreach (var additionalNode in additionalNodes)
         {
-            itw.WriteLine($"// {namespaceCache[(NodeCommon)additionalNode.Parent!]}.{additionalNode.Name}");
+            itw.Write("// ");
+            itw.WriteLine(NodesFullName[additionalNode.Id]);
         }
-        var newRoot = new NodeRoot();
-        var addStack = new Stack<NodeBase>();
-        for (int i = 0; i < additionalNodes.Count; i++)
-        {
-            NodeBase? node = additionalNodes[i];
-            while (node.Parent is not null)
-            {
-                addStack.Push(node.Parent);
-                node = node.Parent;
-            }
-            NodeCommon node2 = newRoot;
-            while (addStack.Count > 0)
-            {
-                node2 = node2.GetOrAddChild((NodeCommon)addStack.Pop());
-            }
-            node2.Children.Add(additionalNodes[i].CloneWithNewParent(node2));
-        }
-        var enumerators = new List<NodeBase>.Enumerator[additionalNodes.Max(static x => x.Depth)];
-        index = 0;
-        enumerators[0] = newRoot.GetEnumerator();
-        NodeLeaf? lastLeaf = null;
-        var lastWritedEndIf = true;
-        var needWriteEndIf = false;
-        var ifConditionString = condititonCache.GetOrAdd("true");
-        while (index != -1)
-        {
-            ref var enumerator = ref enumerators[index];
-            NodeBase? lastNode = null;
-            try
-            {
-                lastNode = enumerator.Current;
-            }
-            catch { }
-            if (!enumerator.MoveNext())
-            {
-                index--;
-                if (index != -1)
-                {
-                    if (!lastWritedEndIf)
-                    {
-                        lastWritedEndIf = true;
-                        if (needWriteEndIf)
-                        {
-                            itw.WriteLine("#endif");
-                        }
-                        needWriteEndIf = false;
-                    }
-                    if(useExtensions && lastNode is NodeLeaf { IsClass: false, IsInstanceExtension: false })
-                    {
-                        itw.CloseBrace();
-                    }
-                    itw.CloseBrace();
-                }
-                continue;
-            }
-            if (enumerator.Current is NodeCommon nodeCommon)
-            {
-                if (!lastWritedEndIf)
-                {
-                    lastWritedEndIf = true;
-                    if (needWriteEndIf)
-                    {
-                        itw.WriteLine("#endif");
-                    }
-                    needWriteEndIf = false;
-                }
-                itw.WriteLine(nodeCommon.GetText(modifierCache.TryGetValue(nodeCommon, out var modifer) ? modifer : defaultModifer));
-                itw.OpenBrace();
-                index++;
-                enumerators[index] = nodeCommon.Children.GetEnumerator();
-            }
-            else
-            {
-                var leaf = (NodeLeaf)enumerator.Current;
-                if (useExtensions && !leaf.IsClass && !leaf.IsInstanceExtension && (lastNode is null || lastNode is NodeLeaf { IsInstanceExtension: true }))
-                {
-                    itw.WriteLine($"extension({leaf.Parent!.Name})");
-                    itw.OpenBrace();
-                }
-                if (lastLeaf is null || !ReferenceEquals(lastLeaf.Parent, leaf.Parent) || !ReferenceEquals(lastLeaf.GetConditon(useRealCondition), leaf.GetConditon(useRealCondition)))
-                {
-                    if (!lastWritedEndIf && lastLeaf is not null)
-                    {
-                        lastWritedEndIf = true;
-                        if (needWriteEndIf)
-                        {
-                            itw.WriteLine("#endif");
-                        }
-                        needWriteEndIf = false;
-                    }
-                    if (!ReferenceEquals(ifConditionString, leaf.GetConditon(useRealCondition)))
-                    {
-                        needWriteEndIf = true;
-                        itw.WriteLine($"#if {leaf.GetConditon(useRealCondition)}");
-                    }
-                }
-                for (int i = 0; i < leaf.Lines.Length; i++)
-                {
-                    if (i == leaf.ModiferLineIndex)
-                    {
-                        itw.WriteLineWithSpace(modifierCache.TryGetValue(leaf, out var modifer) ? modifer : defaultModifer, leaf.Lines[i]);
-                    }
-                    else
-                    {
-                        itw.WriteLine(leaf.Lines[i]);
-                    }
-                }
-                lastLeaf = leaf;
-                lastWritedEndIf = false;
-            }
-        }
-        var result = itw.ToString();
+        BuildTree(additionalNodes, AllNodes).Write(itw, options, modifierCache);
+        memoryStream.Position = 0;
+        var result = new StreamReader(memoryStream).ReadToEnd();
         context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
     }
 
@@ -863,5 +488,45 @@ public class FeatureGenerator :
         }
         depth = spaceLength / 4;
         return true;
+    }
+    private static NodeNamespace BuildTree(List<NodeBase> nodes, NodeBase[] allNodes)
+    {
+        var result = new NodeNamespace("");
+        var needIds = new Stack<int>();
+        var thisAllNodes = new NodeBase[allNodes.Length];
+        foreach(var addNode in nodes)
+        {
+            needIds.Clear();
+            needIds.Push(addNode.ParentId);
+            NodeBase? findNode;
+            int findId;
+            while (true)
+            {
+                findId = needIds.Peek();
+                if (thisAllNodes[findId] is not null)
+                {
+                    findNode = thisAllNodes[findId];
+                    needIds.Pop();
+                    break;
+                }
+                var parentId = allNodes[findId].ParentId;
+                if(parentId == -1)
+                {
+                    findNode = result;
+                    break;
+                }
+                needIds.Push(parentId);
+            }
+            while (needIds.Count > 0)
+            {
+                findId = needIds.Pop();
+                var parentNode = (HasChildrenNode)allNodes[findId].Clone();
+                thisAllNodes[findId] = parentNode;
+                ((HasChildrenNode)findNode).AddChild(parentNode);
+                findNode = parentNode;
+            }
+            ((HasChildrenNode)findNode!).AddChild(addNode);
+        }
+        return result;
     }
 }

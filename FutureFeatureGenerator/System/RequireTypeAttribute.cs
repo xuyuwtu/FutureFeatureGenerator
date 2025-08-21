@@ -1,11 +1,14 @@
-﻿namespace System;
+﻿using System.Diagnostics;
+
+namespace System;
 
 [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-internal sealed class RequireTypeAttribute : Attribute
+[Conditional("FALSE")]
+internal sealed class RequireType : Attribute
 {
     public string TypeFullName { get; }
 
-    public RequireTypeAttribute(string typeFullName)
+    public RequireType(string typeFullName)
     {
         TypeFullName = typeFullName;
     }

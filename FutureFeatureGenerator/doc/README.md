@@ -25,7 +25,7 @@ System
 
 可以在文件第一行写`*`，那么会加入所有类型
 
-每个类型都有各自的`#if`条件编译，还会检测所有引用的程序集中的`public`类型定义，如果名称完全匹配，那么这个类型也不会生成代码
+每个类型都有各自的`#if`条件编译
 
 默认修饰符为`internal`，如果想修改为public，那么在要添加的类型后面加上一个空格和`public`
 
@@ -42,10 +42,14 @@ FutureArgumentNullException.ThrowIfNull(arg);
 #endif
 ```
 
-有两个配置项，`UseExtensions`会在`static`方法外加上`extensions()`，`UseRealCondition`则会使用实际的条件而不是`#if true`，下面是启用语法
+有三个配置项，默认都为`false`
+`UseExtensions`会在`static`方法外加上`extensions()`  
+`UseRealCondition`则会使用实际的条件而不是`#if true`，下面是启用语法  
+`DisableAddDependencies`取消自动添加依赖类型和方法
 ```
 @UseExtensions true
 @UseRealCondition true
+@DisableAddDependencies true
 ```
 
 例如:
@@ -56,7 +60,14 @@ System.ArgumentException
     ThrowIfNullOrEmpty()
     ThrowIfNullOrWhiteSpace()
 ```
-
+可以直接无缩进写最终节点名称。(如果找到多个，会都加入进来)
+例如：
+```
+System.Runtime.CompilerServices
+    IsExternalInit
+;和下面效果一样
+IsExternalInit
+```
 提供以下类型和方法:
 ```
 System

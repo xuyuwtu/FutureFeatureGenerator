@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,8 +11,8 @@ namespace FutureFeatureGenerator;
 
 internal static class Utils
 {
-    public static readonly char[] PointSeparator = new char[] { '.' };
-    public static readonly char[] SpaceSeparator = new char[] { ' ' };
+    public static readonly char[] PointSeparator = ['.'];
+    public static readonly char[] SpaceSeparator = [' '];
     public static bool SkipWhileSpaceFirstCharIs(ReadOnlySpan<char> text, char chr)
     {
         foreach(var c in text)
@@ -97,74 +99,13 @@ internal static class Utils
         }
         return self.Count == 0;
     }
-    public static int GetNumberFromSingleLineComment(string s)
-    {
-        var startIndex = s.IndexOf(' ', "//".Length);
-        if (startIndex == -1)
-        {
-            throw new ArgumentException("invalid syntax");
-        }
-        var endIndex = s.IndexOf(' ', startIndex + 1);
-        if (endIndex == -1)
-        {
-            return int.Parse(s.Substring(startIndex + 1));
-        }
-        return int.Parse(s.Substring(startIndex, endIndex - startIndex));
-    }
-    public static int GetNumberFromSingleLineCommentOrDefault(string s, int defaultValue)
-    {
-        var startIndex = s.IndexOf(' ', "//".Length);
-        if (startIndex == -1)
-        {
-            return defaultValue;
-        }
-        if (s.AsSpan(startIndex).IsWhiteSpace())
-        {
-            return defaultValue;
-        }
-        var endIndex = s.IndexOf(' ', startIndex + 1);
-        if (endIndex == -1)
-        {
-            return int.Parse(s.Substring(startIndex + 1));
-        }
-        return int.Parse(s.Substring(startIndex, endIndex - startIndex));
-    }
-    public static void GetNumbersFromSingleLineComment(string s, out int num1, out int num2)
-    {
-        var startIndex = s.IndexOf(' ', "//".Length);
-        if (startIndex == -1)
-        {
-            throw new ArgumentException("invalid syntax");
-        }
-        var result = (stackalloc int[2]);
-        for (int i = 0; i < 2; i++)
-        {
-            var endIndex = s.IndexOf(' ', startIndex + 1);
-            result[i] = int.Parse(s.Substring(startIndex, endIndex - startIndex));
-            startIndex = endIndex;
-        }
-        num1 = result[0];
-        num2 = result[1];
-    }
-    public static int[] GetNumbersFromSingleLineComment(string s, int count)
-    {
-        var startIndex = s.IndexOf(' ', "//".Length);
-        if (startIndex == -1)
-        {
-            throw new ArgumentException("invalid syntax");
-        }
-        var result = new int[count];
-        for (int i = 0; i < count; i++)
-        {
-            var endIndex = s.IndexOf(' ', startIndex + 1);
-            result[i] = int.Parse(s.Substring(startIndex, endIndex - startIndex));
-            startIndex = endIndex;
-        }
-        return result;
-    }
     public static StreamReaderWrapper GetWrapper(this StreamReader reader) => new(reader);
     public static Func<string[], bool> GetConditionFunc(string condition)
     {
+        if (string.IsNullOrEmpty(condition))
+        {
+            return static _ => true;
+        }
         var syntaxTree = CSharpSyntaxTree.ParseText(
                $"""
                 #if {condition}
@@ -216,5 +157,141 @@ internal static class Utils
             default:
                 throw new InvalidDataException(expression.GetType().FullName);
         }
+    }
+    private static Regex nameofValueRegex = new Regex(@"nameof\((.*?)\)");
+    public static NodeMethod GetMethodNode(string name, StreamReaderWrapper readerWrapper, int skipCount, int startLine)
+    {
+        const int ReadDependencies = 0, ReadCondition = 1, ReadLine = 2, EndCondition = 3;
+        var dependencies = new List<object>();
+        var modifierLineIndex = -1;
+        string? aliasName = null;
+        string? condition = null;
+        var lines = new List<string>();
+        var state = 0;
+        var isStatic = false;
+        while (readerWrapper.CurrentLine < startLine)
+        {
+            readerWrapper.ReadLine();
+        }
+        string? text;
+        string? realCondition = null;
+        var ifCount = 0;
+        while (!readerWrapper.EndOfStream)
+        {
+            text = readerWrapper.ReadLine();
+            if (string.IsNullOrEmpty(text))
+            {
+                continue;
+            }
+            switch (state)
+            {
+                case ReadDependencies:
+                    var dependencyText = text.AsSpan(skipCount);
+                    if (dependencyText.StartsWith("//".AsSpan()))
+                    {
+                        dependencies.Add(text.AsSpan(skipCount + "//".Length).Trim().ToString());
+                    }
+                    else if (dependencyText.StartsWith("[RequireType".AsSpan()))
+                    {
+                        dependencies.Add(nameofValueRegex.Match(text).Groups[1].Value);
+                    }
+                    else if (dependencyText.StartsWith("[Alias".AsSpan()))
+                    {
+                        aliasName = nameofValueRegex.Match(text).Groups[1].Value + "()";
+                    }
+                    else if (dependencyText.StartsWith("[RealCondition".AsSpan()))
+                    {
+                        realCondition = Regex.Match(text, "\"(.*?)\"").Groups[1].Value;
+                    }
+                    else
+                    {
+                        state++;
+                        goto case ReadCondition;
+                    }
+                    break;
+                case ReadCondition:
+                    condition = text.Substring("#if".Length).Trim();
+                    if (realCondition is not null)
+                    {
+                        condition = realCondition;
+                    }
+                    ifCount = 1;
+                    state++;
+                    break;
+                case ReadLine:
+                    if (text.StartsWith("#if"))
+                    {
+                        ifCount++;
+                        lines.Add(text);
+                    }
+                    else if (text.StartsWith("#endif"))
+                    {
+                        if (--ifCount == 0)
+                        {
+                            state++;
+                            goto case EndCondition;
+                        }
+                        else
+                        {
+                            lines.Add(text);
+                        }
+                    }
+                    else
+                    {
+                        // #else
+                        if (text[0] == '#')
+                        {
+                            lines.Add(text);
+                        }
+                        else
+                        {
+                            var textSpan = text.AsSpan(skipCount);
+                            if (modifierLineIndex == -1)
+                            {
+                                if (textSpan.StartsWith(Modifiers.Internal.AsSpan()))
+                                {
+                                    textSpan = textSpan.Slice(Modifiers.Internal.Length).Trim();
+                                    modifierLineIndex = lines.Count;
+                                }
+                                if (textSpan.IndexOf("(this".AsSpan()) == -1)
+                                {
+                                    isStatic = true;
+                                }
+                            }
+                            lines.Add(textSpan.ToString());
+                        }
+
+                    }
+                    break;
+                case EndCondition:
+                    if (text.Trim() != "#endif")
+                    {
+                        throw new InvalidDataException("the last line must be '#endif'");
+                    }
+                    goto endRead;
+                default:
+                    throw new NotImplementedException("unknown state");
+            }
+        }
+    endRead:
+        if (state != EndCondition)
+        {
+            throw new InvalidDataException("not found '^#endif'");
+        }
+        if (string.IsNullOrEmpty(condition))
+        {
+            throw new ArgumentException("Condition cannot be null");
+        }
+        // resolve null warn
+        condition ??= "";
+        return new NodeMethod([.. lines], condition, name) { AliasName = aliasName, Dependencies = [.. dependencies], ModifierLineIndex = modifierLineIndex, IsStatic = isStatic };
+    }
+    public static TValue? TryGet<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key) where TValue : class
+    {
+        if(self.TryGetValue(key, out var value))
+        {
+            return value;
+        }
+        return default;
     }
 }
