@@ -4,7 +4,8 @@ namespace System.IO;
 internal static partial class FutureStream
 {
     // System.Span`1
-    #region Read()
+    #region Read(Span<byte>)
+    [Alias(nameof(Read))]
 #if !NETCOREAPP2_1_OR_GREATER
     internal static int Read(this Stream self, Span<byte> buffer)
     {
@@ -28,7 +29,8 @@ internal static partial class FutureStream
     #endregion
 
     // System.ReadOnlySpan`1
-    #region Write()
+    #region Write(ReadOnlySpan<byte>)
+    [Alias(nameof(Write))]
 #if !NETCOREAPP2_1_OR_GREATER
     internal static void Write(this Stream self, ReadOnlySpan<byte> buffer)
     {

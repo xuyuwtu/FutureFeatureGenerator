@@ -70,6 +70,11 @@ IsExternalInit
 Provide the following types and methods:
 ```
 System
+    Collections.Generic
+        Dictionary
+            TryAdd()
+        KeyValuePair
+            Deconstruct()
     Diagnostics.CodeAnalysis
         AllowNullAttribute
         DisallowNullAttribute
@@ -86,10 +91,10 @@ System
         StringSyntaxAttribute
     IO
         Stream
-            ;Read(Span<byte>)
-            Read()
-            ;Write(ReadOnlySpan<byte>)
-            Write()
+            ;Read()
+            Read(Span<byte>)
+            ;Write()
+            Write(ReadOnlySpan<byte>)
     Reflection
         AssemblyMetadataAttribute
     Runtime.CompilerServices
@@ -115,17 +120,49 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
+    BitConverter
+        ToBoolean()
+        ToChar()
+        ToDouble()
+        ToInt16()
+        ToInt32()
+        ToInt64()
+        ToSingle()
+        ToUInt16()
+        ToUInt32()
+        ToUInt64()
+        ;TryWriteBytes()
+        TryWriteBytes(bool)
+        TryWriteBytes(char)
+        TryWriteBytes(double)
+        TryWriteBytes(short)
+        TryWriteBytes(int)
+        TryWriteBytes(long)
+        TryWriteBytes(float)
+        TryWriteBytes(ushort)
+        TryWriteBytes(uint)
+        TryWriteBytes(ulong)
     Char
         IsAscii()
         IsBetween()
         IsAsciiDigit()
+    Double
+        IsFinite()
+        IsNegative()
+        IsNormal()
+        IsSubnormal()
     Index
-    Range
-    Type
-        GetConstructor()
-        GetMethod()
     ObjectDisposedException
         ;ThrowIf()
         ThrowIf(Boolean,Object)
         ThrowIf(Boolean,Type)
+    Range
+    Single
+        IsFinite()
+        IsNegative()
+        IsNormal()
+        IsSubnormal()
+    Type
+        GetConstructor()
+        GetMethod()
 ```

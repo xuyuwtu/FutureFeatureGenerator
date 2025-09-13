@@ -176,6 +176,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(bool)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, bool value)
@@ -191,6 +192,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(char)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, char value)
@@ -206,6 +208,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(double)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, double value)
@@ -221,6 +224,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(short)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, short value)
@@ -236,6 +240,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(int)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, int value)
@@ -251,6 +256,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(long)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, long value)
@@ -266,6 +272,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(float)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, float value)
@@ -281,6 +288,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(ushort)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, ushort value)
@@ -296,6 +304,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(uint)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, uint value)
@@ -311,6 +320,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region TryWriteBytes(ulong)
+    [Alias(nameof(TryWriteBytes))]
     [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
 #if true
     internal static bool TryWriteBytes(Span<byte> destination, ulong value)
