@@ -71,6 +71,13 @@ Provide the following types and methods:
 ```
 System
     Collections.Generic
+        CollectionExtensions
+            AsReadOnly(IList<T>)
+            AsReadOnly(IDictionary<TKey,TValue>)
+            GetValueOrDefault(IReadOnlyDictionary<TKey,TValue>,TKey)
+            GetValueOrDefault(IReadOnlyDictionary<TKey,TValue>,TKey,TValue)
+            Remove(IDictionary<TKey,TValue>,TKey,out-TValue)
+            TryAdd(IDictionary<TKey,TValue>,TKey,TValue)
         Dictionary
             TryAdd()
         KeyValuePair
