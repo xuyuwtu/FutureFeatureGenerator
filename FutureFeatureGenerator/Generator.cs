@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,7 +43,7 @@ public class FeatureGenerator :
 #if UseIIncrementalGenerator
         context.RegisterSourceOutput(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect().Combine(context.CompilationProvider), Execute);
 #endif
-        if (!_isInitialized)
+        if (!Volatile.Read(ref _isInitialized))
         {
             Init();
         }
