@@ -24,7 +24,7 @@ internal abstract class NodeBase
         NodeType = nodeType;
         Name = name;
     }
-    public abstract void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord);
+    public abstract void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord, string[] nodesNamespace);
     public virtual void ThrowIfNotValid()
     {
         FutureArgumentOutOfRangeException.ThrowIfLessThan(Id, 0);
@@ -41,7 +41,6 @@ internal abstract class NodeBase
         }
         return [];
     }
-    public abstract NodeBase Clone();
 }
 internal abstract class HasChildrenNode : NodeBase
 {
@@ -50,7 +49,7 @@ internal abstract class HasChildrenNode : NodeBase
     {
         Children = [];
     }
-    public override NodeBase Clone()
+    public HasChildrenNode CloneWithoutChildren()
     {
         var result = (HasChildrenNode)MemberwiseClone();
         result.Children = [];
@@ -158,7 +157,7 @@ internal class NodeNamespace : HasChildrenNode
     {
     }
 
-    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord)
+    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord, string[] nodesNamespace)
     {
         if (!string.IsNullOrEmpty(Name))
         {
@@ -177,7 +176,7 @@ internal class NodeNamespace : HasChildrenNode
             }
             foreach (var child in group)
             {
-                child.Write(writer, options, modifierRecord);
+                child.Write(writer, options, modifierRecord, nodesNamespace);
             }
             if (writeIf)
             {
@@ -186,7 +185,7 @@ internal class NodeNamespace : HasChildrenNode
         }
         foreach (var child in Children.OfType<NodeNamespace>())
         {
-            child.Write(writer, options, modifierRecord);
+            child.Write(writer, options, modifierRecord, nodesNamespace);
         }
         if (!string.IsNullOrEmpty(Name))
         {
@@ -212,7 +211,7 @@ internal class NodeClass : HasChildrenNode
         }
         Condition = condition;
     }
-    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord)
+    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord, string[] nodesNamespace)
     {
         var modifier = modifierRecord.TryGet(Id);
         if (modifier is null) 
@@ -230,6 +229,7 @@ internal class NodeClass : HasChildrenNode
             {
                 if (i == ModifierLineIndex)
                 {
+                    Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
                     writer.Write(modifier);
                     writer.Write(' ');
                 }
@@ -238,6 +238,7 @@ internal class NodeClass : HasChildrenNode
         }
         else
         {
+            Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
             writer.Write(modifier);
             writer.Write(" static partial class Future");
             writer.WriteLine(Name);
@@ -264,7 +265,7 @@ internal class NodeClass : HasChildrenNode
                         }
                         foreach (var child in group)
                         {
-                            child.Write(writer, options, modifierRecord);
+                            child.Write(writer, options, modifierRecord, nodesNamespace);
                         }
                         if (writeIf)
                         {
@@ -287,7 +288,7 @@ internal class NodeClass : HasChildrenNode
                 }
                 foreach (var child in group)
                 {
-                    child.Write(writer, options, modifierRecord);
+                    child.Write(writer, options, modifierRecord, nodesNamespace);
                 }
                 if (writeIf)
                 {
@@ -337,12 +338,13 @@ internal class NodeMethod : NodeBase
         Condition = condition;
     }
 
-    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord)
+    public override void Write(IndentedTextWriter writer, Options options, Dictionary<int, string> modifierRecord, string[] nodesNamespace)
     {
         for (int i = 0; i < Lines.Length; i++)
         {
             if (i == ModifierLineIndex)
             {
+                Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
                 writer.Write(modifierRecord.TryGet(Id) ?? modifierRecord.TryGet(ParentId) ?? Modifiers.Internal);
                 writer.Write(' ');
             }
@@ -354,7 +356,6 @@ internal class NodeMethod : NodeBase
         base.ThrowIfNotValid();
         FutureArgumentOutOfRangeException.ThrowIfLessThan(ModifierLineIndex, 0);
     }
-    public override NodeBase Clone() => (NodeBase)MemberwiseClone();
     public string GetCondition(bool real)
     {
         if (IsStatic)

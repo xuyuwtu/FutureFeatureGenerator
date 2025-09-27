@@ -14,8 +14,10 @@ internal class Program
             "Test", 
             [CSharpSyntaxTree.ParseText("namespace { class TestClass { } }", new CSharpParseOptions(
                 LanguageVersion.CSharp13, 
-                preprocessorSymbols: ["NETCOREAPP3_0_OR_GREATER", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER"]))], 
-            ReferenceAssemblies.Net.Net60.ResolveAsync(null, default).Result, 
+                //preprocessorSymbols: ["NETCOREAPP3_0_OR_GREATER", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER"]))], 
+                preprocessorSymbols: ["NETSTANDARD", "NETSTANDARD2_0_OR_GREATER"]))], 
+            //ReferenceAssemblies.Net.Net60.ResolveAsync(null, default).Result, 
+            ReferenceAssemblies.NetStandard.NetStandard20.ResolveAsync(null, default).Result, 
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         var csharpGeneratorDriver = CSharpGeneratorDriver.Create(new FeatureGenerator());
         var generatorDriver = csharpGeneratorDriver.AddAdditionalTexts([MyText.From(

@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +13,7 @@ internal static class Utils
 {
     public static readonly char[] PointSeparator = ['.'];
     public static readonly char[] SpaceSeparator = [' '];
+    private static char[] GeneratedCodeAttributeNamespaceChars = "System.CodeDom.Compiler".ToCharArray();
     public static bool SkipWhileSpaceFirstCharIs(ReadOnlySpan<char> text, char chr)
     {
         foreach(var c in text)
@@ -293,5 +294,37 @@ internal static class Utils
             return value;
         }
         return default;
+    }
+    private static int GetNotEqualIndex(string findNs, char[] baseNs)
+    {
+        var count = Math.Min(findNs.Length, baseNs.Length);
+        int i = 0;
+        for(; i < count; i++)
+        {
+            if (findNs[i] != baseNs[i])
+            {
+                break;
+            }
+        }
+        return i;
+    }
+    public static void WriteGeneratedCodeAttribute(IndentedTextWriter writer, string currentNamespace)
+    {
+        var index = GetNotEqualIndex(currentNamespace, GeneratedCodeAttributeNamespaceChars);
+        writer.Write('[');
+        if(index == 0)
+        {
+            writer.Write(GeneratedCodeAttributeNamespaceChars);
+        }
+        else
+        {
+            // skip '.' for example 'System'
+            if (index == currentNamespace.Length)
+            {
+                index++;
+            }
+            writer.Write(GeneratedCodeAttributeNamespaceChars, index, GeneratedCodeAttributeNamespaceChars.Length - index);
+        }
+        writer.WriteLine($".{nameof(GeneratedCodeAttribute)}(\"{nameof(FeatureGenerator)}\", \"{FeatureGenerator.Version}\")]");
     }
 }

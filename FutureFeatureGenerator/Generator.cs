@@ -1,8 +1,8 @@
 ﻿using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -22,6 +22,7 @@ public class FeatureGenerator :
     private readonly Dictionary<int, string> modifierCache = [];
     private static readonly Regex requireTypeMatcher = new(@$"\[{nameof(RequireType)}\(nameof\((.*?)\)\)\]");
     public const string FileName = "FutureFeature.txt";
+    public const string Version = "1.4.0";
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
     const string childrenLeafAllMatchString = "*";
@@ -29,6 +30,7 @@ public class FeatureGenerator :
     private NodeBase[] AllNodes = [];
     private NodeBase[] AllLeafNodes = [];
     private string[] NodesFullName = [];
+    internal string[] NodesNamespace = [];
     private bool _isInitialized = false;
     static FeatureGenerator()
     {
@@ -212,9 +214,18 @@ public class FeatureGenerator :
         AllNodes = [.. allNodes];
         AllLeafNodes = [.. allNodes.Where(x => x.IsLeaf)];
         NodesFullName = new string[AllNodes.Length];
+        NodesNamespace = new string[AllNodes.Length];
         for (int i = 0; i < AllNodes.Length; i++)
         {
-            NodesFullName[i] = AllNodes[i].ParentId == -1 ? AllNodes[i].Name : NodesFullName[AllNodes[i].ParentId] + "." + AllNodes[i].Name;
+            var node = AllNodes[i];
+            NodesFullName[i] = node.ParentId == -1 ? node.Name : NodesFullName[node.ParentId] + "." + node.Name;
+            NodesNamespace[i] = node.NodeType switch
+            {
+                NodeType.Namespace => NodesFullName[i],
+                NodeType.Class or NodeType.Method => NodesNamespace[node.ParentId],
+                _ => throw new InvalidEnumArgumentException($"NodeType: {node.NodeType}")
+            };
+
         }
         foreach (var node in AllLeafNodes)
         {
@@ -457,7 +468,7 @@ public class FeatureGenerator :
             itw.Write("// ");
             itw.WriteLine(NodesFullName[additionalNode.Id]);
         }
-        BuildTree(additionalNodes, AllNodes).Write(itw, options, modifierCache);
+        BuildTree(additionalNodes, AllNodes).Write(itw, options, modifierCache, NodesNamespace);
         memoryStream.Position = 0;
         var result = new StreamReader(memoryStream).ReadToEnd();
         context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
@@ -521,7 +532,7 @@ public class FeatureGenerator :
             while (needIds.Count > 0)
             {
                 findId = needIds.Pop();
-                var parentNode = (HasChildrenNode)allNodes[findId].Clone();
+                var parentNode = ((HasChildrenNode)allNodes[findId]).CloneWithoutChildren();
                 thisAllNodes[findId] = parentNode;
                 ((HasChildrenNode)findNode).AddChild(parentNode);
                 findNode = parentNode;
