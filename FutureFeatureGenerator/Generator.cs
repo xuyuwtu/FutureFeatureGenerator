@@ -22,7 +22,7 @@ public class FeatureGenerator :
     private readonly Dictionary<int, string> modifierCache = [];
     private static readonly Regex requireTypeMatcher = new(@$"\[{nameof(RequireType)}\(nameof\((.*?)\)\)\]");
     public const string FileName = "FutureFeature.txt";
-    public const string Version = "1.4.0";
+    public const string Version = "1.5.0";
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
     const string childrenLeafAllMatchString = "*";
