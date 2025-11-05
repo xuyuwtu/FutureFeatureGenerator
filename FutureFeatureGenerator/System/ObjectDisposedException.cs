@@ -4,7 +4,7 @@ namespace System;
 
 internal static partial class FutureObjectDisposedException
 {
-    #region ThrowIf(Boolean,Object)
+    #region ThrowIf(bool,object)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
 #if !NET7_0_OR_GREATER
@@ -21,7 +21,7 @@ internal static partial class FutureObjectDisposedException
 #endif
     #endregion
 
-    #region ThrowIf(Boolean,Type)
+    #region ThrowIf(bool,Type)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
 #if !NET7_0_OR_GREATER

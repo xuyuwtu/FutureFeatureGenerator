@@ -175,8 +175,8 @@ System
         Clamp(nuint,nuint,nuint)
     ObjectDisposedException
         ;ThrowIf()
-        ThrowIf(Boolean,Object)
-        ThrowIf(Boolean,Type)
+        ThrowIf(bool,object)
+        ThrowIf(bool,Type)
     Range
     Single
         IsFinite()
