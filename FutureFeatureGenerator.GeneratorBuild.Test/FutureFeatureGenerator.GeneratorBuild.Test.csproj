@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>14.0</LangVersion>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="FutureFeature.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AdditionalFiles Include="FutureFeature.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Memory" Version="4.6.0" />
+		<ProjectReference Include="..\FutureFeatureGenerator\FutureFeatureGenerator.csproj">
+			<OutputItemType>Analyzer</OutputItemType>
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		</ProjectReference>
+	</ItemGroup>
+
+</Project>

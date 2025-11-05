@@ -286,35 +286,49 @@ internal static class Utils
         }
         return default;
     }
-    private static int GetNotEqualIndex(string findNs, char[] baseNs)
+    public static ReadOnlySpan<char> GetRelativeNamespace(ReadOnlySpan<char> relativeTo, ReadOnlySpan<char> ns)
     {
-        var count = Math.Min(findNs.Length, baseNs.Length);
-        int i = 0;
-        for(; i < count; i++)
+        var startIndex = 0;
+        var findSpan = relativeTo;
+        var baseSpan = ns;
+        var minLength = Math.Min(findSpan.Length, baseSpan.Length);
+        while (startIndex < minLength)
         {
-            if (findNs[i] != baseNs[i])
+            var index1 = findSpan.Slice(startIndex).IndexOf('.');
+            var index2 = baseSpan.Slice(startIndex).IndexOf('.');
+            var equalSpan1 = index1 == -1 ? findSpan.Slice(startIndex) : findSpan.Slice(startIndex, index1);
+            var equalSpan2 = index2 == -1 ? baseSpan.Slice(startIndex) : baseSpan.Slice(startIndex, index2);
+            if (equalSpan1.Length != equalSpan2.Length)
             {
-                break;
+                return ns.Slice(startIndex);
             }
+            if (!equalSpan1.SequenceEqual(equalSpan2))
+            {
+                return ns.Slice(startIndex);
+            }
+            if (index2 == -1)
+        {
+                return Span<char>.Empty;
+            }
+            if (index1 == -1)
+            {
+                return ns.Slice(startIndex + index2 + 1);
+            }
+            startIndex += index1 + 1;
         }
-        return i;
+        return ns.Slice(startIndex);
     }
     public static void WriteGeneratedCodeAttribute(IndentedTextWriter writer, string currentNamespace)
     {
-        var index = GetNotEqualIndex(currentNamespace, GeneratedCodeAttributeNamespaceChars);
+        var relativeNamespace = GetRelativeNamespace(currentNamespace.AsSpan(), GeneratedCodeAttributeNamespaceChars);
         writer.Write('[');
-        if(index == 0)
+        if(relativeNamespace.IsEmpty)
         {
             writer.Write(GeneratedCodeAttributeNamespaceChars);
         }
         else
         {
-            // skip '.' for example 'System'
-            if (index == currentNamespace.Length)
-            {
-                index++;
-            }
-            writer.Write(GeneratedCodeAttributeNamespaceChars, index, GeneratedCodeAttributeNamespaceChars.Length - index);
+            writer.Write(GeneratedCodeAttributeNamespaceChars, GeneratedCodeAttributeNamespaceChars.Length - relativeNamespace.Length, relativeNamespace.Length);
         }
         writer.WriteLine($".{nameof(GeneratedCodeAttribute)}(\"{nameof(FeatureGenerator)}\", \"{FeatureGenerator.Version}\")]");
     }

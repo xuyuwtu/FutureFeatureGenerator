@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35617.110
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11201.2 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureFeatureGenerator", "FutureFeatureGenerator\FutureFeatureGenerator.csproj", "{5632C586-662C-447D-81FC-2166ADA66F0D}"
 EndProject
@@ -9,6 +9,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureFeatureGenerator.Console.Test", "FutureFeatureGenerator.Console.Test\FutureFeatureGenerator.Console.Test.csproj", "{2B6CF036-C39A-4BFD-BC7A-E6E78400F446}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureFeatureGenerator.Build.Test", "FutureFeatureGenerator.Build.Test\FutureFeatureGenerator.Build.Test.csproj", "{B7D0C203-BC9E-4955-A370-8A3AA91BA680}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FutureFeatureGenerator.GeneratorBuild.Test", "FutureFeatureGenerator.GeneratorBuild.Test\FutureFeatureGenerator.GeneratorBuild.Test.csproj", "{A26E0F0E-F2F1-4548-A1F5-3F2AE1B0CCA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{B7D0C203-BC9E-4955-A370-8A3AA91BA680}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7D0C203-BC9E-4955-A370-8A3AA91BA680}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7D0C203-BC9E-4955-A370-8A3AA91BA680}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A26E0F0E-F2F1-4548-A1F5-3F2AE1B0CCA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A26E0F0E-F2F1-4548-A1F5-3F2AE1B0CCA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A26E0F0E-F2F1-4548-A1F5-3F2AE1B0CCA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A26E0F0E-F2F1-4548-A1F5-3F2AE1B0CCA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
