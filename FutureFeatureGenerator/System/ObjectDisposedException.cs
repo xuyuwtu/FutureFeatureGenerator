@@ -7,8 +7,7 @@ internal static partial class FutureObjectDisposedException
     #region ThrowIf(Boolean,Object)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
-    [RealCondition("!NET7_0_OR_GREATER")]
-#if true
+#if !NET7_0_OR_GREATER
 #if NET6_0_OR_GREATER
     [Diagnostics.StackTraceHidden]
 #endif
@@ -25,8 +24,7 @@ internal static partial class FutureObjectDisposedException
     #region ThrowIf(Boolean,Type)
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute))]
     [Alias(nameof(ThrowIf))]
-    [RealCondition("!NET7_0_OR_GREATER")]
-#if true
+#if !NET7_0_OR_GREATER
 #if NET6_0_OR_GREATER
     [Diagnostics.StackTraceHidden]
 #endif

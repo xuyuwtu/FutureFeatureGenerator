@@ -6,8 +6,7 @@ internal static partial class FutureArgumentException
     #region ThrowIfNullOrEmpty()
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.NotNullAttribute))]
     [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
-    [RealCondition("!NET7_0_OR_GREATER")]
-#if true
+#if !NET7_0_OR_GREATER
     internal static void ThrowIfNullOrEmpty([Diagnostics.CodeAnalysis.NotNull] string? argument, [Runtime.CompilerServices.CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)
@@ -25,8 +24,7 @@ internal static partial class FutureArgumentException
     #region ThrowIfNullOrWhiteSpace()
     [RequireType(nameof(System.Diagnostics.CodeAnalysis.NotNullAttribute))]
     [RequireType(nameof(System.Runtime.CompilerServices.CallerArgumentExpressionAttribute))]
-    [RealCondition("!NET8_0_OR_GREATER")]
-#if true
+#if !NET8_0_OR_GREATER
     internal static void ThrowIfNullOrWhiteSpace([Diagnostics.CodeAnalysis.NotNull] string? argument, [Runtime.CompilerServices.CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument is null)

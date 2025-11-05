@@ -175,7 +175,6 @@ internal static class Utils
             readerWrapper.ReadLine();
         }
         string? text;
-        string? realCondition = null;
         var ifCount = 0;
         while (!readerWrapper.EndOfStream)
         {
@@ -200,10 +199,6 @@ internal static class Utils
                     {
                         aliasName = nameofValueRegex.Match(text).Groups[1].Value + "()";
                     }
-                    else if (dependencyText.StartsWith("[RealCondition".AsSpan()))
-                    {
-                        realCondition = Regex.Match(text, "\"(.*?)\"").Groups[1].Value;
-                    }
                     else
                     {
                         state++;
@@ -211,11 +206,7 @@ internal static class Utils
                     }
                     break;
                 case ReadCondition:
-                    condition = text.Substring("#if".Length).Trim();
-                    if (realCondition is not null)
-                    {
-                        condition = realCondition;
-                    }
+                    condition = text.AsSpan("#if".Length).Trim().ToString();
                     ifCount = 1;
                     state++;
                     break;

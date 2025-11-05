@@ -6,8 +6,7 @@ namespace System;
 internal static partial class FutureBitConverter
 {
     #region ToBoolean()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -23,8 +22,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToChar()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -40,8 +38,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToDouble()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -57,8 +54,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToInt16()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -74,8 +70,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToInt32()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -91,8 +86,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToInt64()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -108,8 +102,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToSingle()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -125,8 +118,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToUInt16()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -142,8 +134,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToUInt32()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -159,8 +150,7 @@ internal static partial class FutureBitConverter
     #endregion
 
     #region ToUInt64()
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -177,8 +167,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(bool)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, bool value)
     {
         if (destination.Length < sizeof(byte))
@@ -193,8 +182,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(char)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, char value)
     {
         if (destination.Length < sizeof(char))
@@ -209,8 +197,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(double)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, double value)
     {
         if (destination.Length < sizeof(double))
@@ -225,8 +212,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(short)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, short value)
     {
         if (destination.Length < sizeof(short))
@@ -241,8 +227,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(int)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, int value)
     {
         if (destination.Length < sizeof(int))
@@ -257,8 +242,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(long)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, long value)
     {
         if (destination.Length < sizeof(long))
@@ -273,8 +257,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(float)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, float value)
     {
         if (destination.Length < sizeof(float))
@@ -289,8 +272,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(ushort)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, ushort value)
     {
         if (destination.Length < sizeof(ushort))
@@ -305,8 +287,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(uint)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, uint value)
     {
         if (destination.Length < sizeof(uint))
@@ -321,8 +302,7 @@ internal static partial class FutureBitConverter
 
     #region TryWriteBytes(ulong)
     [Alias(nameof(TryWriteBytes))]
-    [RealCondition("!(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)")]
-#if true
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static bool TryWriteBytes(Span<byte> destination, ulong value)
     {
         if (destination.Length < sizeof(ulong))

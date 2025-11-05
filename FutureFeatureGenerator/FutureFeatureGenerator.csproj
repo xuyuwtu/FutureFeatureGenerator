@@ -28,7 +28,6 @@
 		<Compile Include="System\ArgumentNullException.cs" />
 		<Compile Include="System\ArgumentOutOfRangeException.cs" />
 		<Compile Include="System\RequireTypeAttribute.cs" />
-		<Compile Include="System\RealConditionAttribute.cs" />
 		<Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\DisallowNullAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\MaybeNullWhenAttribute.cs" />
@@ -36,7 +35,6 @@
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullWhenAttribute.cs" />
 		<EmbeddedResource Include="System\**\*.cs" />
 		<EmbeddedResource Remove="System\AliasAttribute.cs" />
-		<EmbeddedResource Remove="System\RealConditionAttribute.cs" />
 		<EmbeddedResource Remove="System\RequireTypeAttribute.cs" />
 	</ItemGroup>
 
