@@ -128,6 +128,13 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
+    ArraySegment
+        CopyTo(T[])
+        CopyTo(T[],int)
+        CopyTo(ArraySegment<T>)
+        Slice(int)
+        Slice(int,int)
+        ToArray()
     BitConverter
         ToBoolean()
         ToChar()
