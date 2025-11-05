@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>1.5.0</Version>
+		<Version>1.6.0</Version>
 		<LangVersion>13.0</LangVersion>
 		<Nullable>enable</Nullable>
 		<!-- EmbeddedResource name -->
@@ -13,8 +13,10 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<IsPackable>true</IsPackable>
-		<PackageTags>source generator;analyzers</PackageTags>
+		<PackageTags>CSharp CodeGenerator</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<ChangeLogFile>$(MSBuildProjectDirectory)\LATEST.md</ChangeLogFile>
+		<PackageReleaseNotes>$([System.IO.File]::ReadAllText($(ChangeLogFile)))</PackageReleaseNotes>
 		<Description>a code generator for csharp language feature</Description>
 		<Authors>Xuyuwtu</Authors>
 		<IncludeBuildOutput>false</IncludeBuildOutput>

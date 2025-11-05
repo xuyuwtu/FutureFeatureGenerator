@@ -22,7 +22,7 @@ public class FeatureGenerator :
     private readonly Dictionary<int, string> modifierCache = [];
     private static readonly Regex requireTypeMatcher = new(@$"\[{nameof(RequireType)}\(nameof\((.*?)\)\)\]");
     public const string FileName = "FutureFeature.txt";
-    public const string Version = "1.5.0";
+    public static string Version { get; }
     const char commentChar = ';';
     const char childrenLeafAllMatchChar = '*';
     const string childrenLeafAllMatchString = "*";
@@ -35,6 +35,7 @@ public class FeatureGenerator :
     static FeatureGenerator()
     {
         NodeMethod.TrueCondition = conditionCache.GetOrAdd("true");
+        Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
     }
 #if UseIIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
