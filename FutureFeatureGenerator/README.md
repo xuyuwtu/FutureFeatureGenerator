@@ -159,6 +159,20 @@ System
         IsNormal()
         IsSubnormal()
     Index
+    Math
+        Clamp(byte,byte,byte)
+        Clamp(decimal,decimal,decimal)
+        Clamp(double,double,double)
+        Clamp(short,short,short)
+        Clamp(int,int,int)
+        Clamp(long,long,long)
+        Clamp(sbyte,sbyte,sbyte)
+        Clamp(float,float,float)
+        Clamp(ushort,ushort,ushort)
+        Clamp(uint,uint,uint)
+        Clamp(ulong,ulong,ulong)
+        Clamp(nint,nint,nint)
+        Clamp(nuint,nuint,nuint)
     ObjectDisposedException
         ;ThrowIf()
         ThrowIf(Boolean,Object)
