@@ -6,7 +6,7 @@ internal static partial class FutureMath
 {
     #region Clamp(byte,byte,byte)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -31,7 +31,7 @@ internal static partial class FutureMath
 
     #region Clamp(decimal,decimal,decimal)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -56,7 +56,7 @@ internal static partial class FutureMath
 
     #region Clamp(double,double,double)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -81,7 +81,7 @@ internal static partial class FutureMath
 
     #region Clamp(short,short,short)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -106,7 +106,7 @@ internal static partial class FutureMath
 
     #region Clamp(int,int,int)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -131,7 +131,7 @@ internal static partial class FutureMath
 
     #region Clamp(long,long,long)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -156,7 +156,7 @@ internal static partial class FutureMath
 
     #region Clamp(sbyte,sbyte,sbyte)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -181,7 +181,7 @@ internal static partial class FutureMath
 
     #region Clamp(float,float,float)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -206,7 +206,7 @@ internal static partial class FutureMath
 
     #region Clamp(ushort,ushort,ushort)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -231,7 +231,7 @@ internal static partial class FutureMath
 
     #region Clamp(uint,uint,uint)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
@@ -256,7 +256,7 @@ internal static partial class FutureMath
 
     #region Clamp(ulong,ulong,ulong)
     [Alias(nameof(Clamp))]
-#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
+#if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 #if NETCOREAPP || NETSTANDARD || NET45_OR_GREATER
     [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 #endif
