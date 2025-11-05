@@ -168,8 +168,8 @@ internal class NodeNamespace : HasChildrenNode
         }
         foreach (var group in Children.OfType<NodeClass>().GroupBy(static x => x.Condition, ReferenceEqualityComparer<string>.Instance))
         {
-            var writeIf = !string.IsNullOrWhiteSpace(group.Key);
-            if (writeIf)
+            var needWriteIf = !string.IsNullOrWhiteSpace(group.Key);
+            if (needWriteIf)
             {
                 writer.Write("#if ");
                 writer.WriteLine(group.Key);
@@ -178,7 +178,7 @@ internal class NodeNamespace : HasChildrenNode
             {
                 child.Write(writer, options, modifierRecord, nodesNamespace);
             }
-            if (writeIf)
+            if (needWriteIf)
             {
                 writer.WriteLine("#endif");
             }
@@ -247,18 +247,18 @@ internal class NodeClass : HasChildrenNode
             var writeMethods = Children.Cast<NodeMethod>();
             if (options.UseExtensions)
             {
-                var statices = writeMethods.Where(static x => x.IsStatic);
-                if (statices.Any())
+                var notExtensionMethods = writeMethods.Where(static x => x.IsNotExtension);
+                if (notExtensionMethods.Any())
                 {
                     writer.Write("extension(");
                     writer.Write(Name);
                     writer.WriteLine(')');
                     writer.WriteLine('{');
                     writer.Indent++;
-                    foreach (var group in statices.GroupBy(x => x.GetCondition(options.UseRealCondition), ReferenceEqualityComparer<string>.Instance))
+                    foreach (var group in notExtensionMethods.GroupBy(x => x.GetCondition(options.UseRealCondition), ReferenceEqualityComparer<string>.Instance))
                     {
-                        var writeIf = !string.IsNullOrWhiteSpace(group.Key);
-                        if (writeIf)
+                        var needWriteIf = !string.IsNullOrWhiteSpace(group.Key);
+                        if (needWriteIf)
                         {
                             writer.Write("#if ");
                             writer.WriteLine(group.Key);
@@ -267,7 +267,7 @@ internal class NodeClass : HasChildrenNode
                         {
                             child.Write(writer, options, modifierRecord, nodesNamespace);
                         }
-                        if (writeIf)
+                        if (needWriteIf)
                         {
                             writer.WriteLine("#endif");
                         }
@@ -275,13 +275,13 @@ internal class NodeClass : HasChildrenNode
                     writer.Indent--;
                     writer.WriteLine('}');
 
-                    writeMethods = writeMethods.Where(static x => !x.IsStatic);
+                    writeMethods = writeMethods.Where(static x => !x.IsNotExtension);
                 }
             }
             foreach (var group in writeMethods.GroupBy(x => x.GetCondition(options.UseRealCondition), ReferenceEqualityComparer<string>.Instance))
             {
-                var writeIf = !string.IsNullOrWhiteSpace(group.Key);
-                if (writeIf)
+                var needWriteIf = !string.IsNullOrWhiteSpace(group.Key);
+                if (needWriteIf)
                 {
                     writer.Write("#if ");
                     writer.WriteLine(group.Key);
@@ -290,7 +290,7 @@ internal class NodeClass : HasChildrenNode
                 {
                     child.Write(writer, options, modifierRecord, nodesNamespace);
                 }
-                if (writeIf)
+                if (needWriteIf)
                 {
                     writer.WriteLine("#endif");
                 }
@@ -322,7 +322,7 @@ internal class NodeMethod : NodeBase
     internal static readonly Dictionary<string, Func<string[], bool>> CondititonFuncCache = new(ReferenceEqualityComparer<string>.Instance);
     internal static string TrueCondition = null!;
     public override bool IsLeaf => true;
-    public bool IsStatic { get; set; }
+    public bool IsNotExtension { get; set; }
     public string Condition { get; set; }
     public string[] Lines { get; set; }
     public int ModifierLineIndex { get; set; } = -1;
@@ -358,15 +358,11 @@ internal class NodeMethod : NodeBase
     }
     public string GetCondition(bool real)
     {
-        if (IsStatic)
+        if (real)
         {
-            if (real)
-            {
-                return Condition;
-            }
-            return TrueCondition;
+            return Condition;
         }
-        return Condition;
+        return TrueCondition;
     }
     public bool IsConditionTrue(bool real, string[] args)
     {

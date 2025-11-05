@@ -169,7 +169,7 @@ internal static class Utils
         string? condition = null;
         var lines = new List<string>();
         var state = 0;
-        var isStatic = false;
+        var isNotExtension = false;
         while (readerWrapper.CurrentLine < startLine)
         {
             readerWrapper.ReadLine();
@@ -247,7 +247,7 @@ internal static class Utils
                                 }
                                 if (textSpan.IndexOf("(this".AsSpan()) == -1)
                                 {
-                                    isStatic = true;
+                                    isNotExtension = true;
                                 }
                             }
                             lines.Add(textSpan.ToString());
@@ -276,7 +276,7 @@ internal static class Utils
         }
         // resolve null warn
         condition ??= "";
-        return new NodeMethod([.. lines], condition, name) { AliasName = aliasName, Dependencies = [.. dependencies], ModifierLineIndex = modifierLineIndex, IsStatic = isStatic };
+        return new NodeMethod([.. lines], condition, name) { AliasName = aliasName, Dependencies = [.. dependencies], ModifierLineIndex = modifierLineIndex, IsNotExtension = isNotExtension };
     }
     public static TValue? TryGet<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key) where TValue : class
     {
@@ -307,7 +307,7 @@ internal static class Utils
                 return ns.Slice(startIndex);
             }
             if (index2 == -1)
-        {
+            {
                 return Span<char>.Empty;
             }
             if (index1 == -1)
