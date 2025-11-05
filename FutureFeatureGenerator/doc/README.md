@@ -184,6 +184,13 @@ System
         IsNegative()
         IsNormal()
         IsSubnormal()
+    String
+        EndsWith(char)
+        GetHashCode(StringComparison)
+        IndexOf(char,StringComparison)
+        StartsWith(char)
+    StringComparer
+        FromComparison(StringComparison)
     Type
         GetConstructor()
         GetMethod()
