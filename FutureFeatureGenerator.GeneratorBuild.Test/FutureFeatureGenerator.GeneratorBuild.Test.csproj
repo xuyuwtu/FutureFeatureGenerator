@@ -1,26 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<LangVersion>14.0</LangVersion>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="FutureFeature.txt" />
+		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzer.Testing" Version="1.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <AdditionalFiles Include="FutureFeature.txt" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="System.Memory" Version="4.6.0" />
-		<ProjectReference Include="..\FutureFeatureGenerator\FutureFeatureGenerator.csproj">
-			<OutputItemType>Analyzer</OutputItemType>
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
+		<ProjectReference Include="..\FutureFeatureGenerator\FutureFeatureGenerator.csproj" />
 	</ItemGroup>
 
 </Project>

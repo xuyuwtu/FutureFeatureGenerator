@@ -12,7 +12,7 @@ internal class Program
     {
         var compilation = CSharpCompilation.Create(
             "Test", 
-            [CSharpSyntaxTree.ParseText("namespace { class TestClass { } }", new CSharpParseOptions(
+            [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } }", new CSharpParseOptions(
                 LanguageVersion.CSharp13, 
                 //preprocessorSymbols: ["NETCOREAPP3_0_OR_GREATER", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER"]))], 
                 preprocessorSymbols: ["NETSTANDARD", "NETSTANDARD2_0_OR_GREATER"]))], 
