@@ -3,8 +3,16 @@
 ## v1.7.0
 ### 添加
 ```
-System.Collections.Generic
-    KeyValuePair
+System
+    Collections.Generic
+        KeyValuePair
+    Runtime
+        CompilerServices
+            RawArrayData
+            RawData
+        InteropServices
+            MemoryMarshal
+                GetArrayDataReference(T[])
 ```
 ### 修改
 ```

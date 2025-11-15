@@ -105,15 +105,21 @@ System
             Write(ReadOnlySpan<byte>)
     Reflection
         AssemblyMetadataAttribute
-    Runtime.CompilerServices
-        CallerArgumentExpressionAttribute
-        CallerFilePathAttribute
-        CallerLineNumberAttribute
-        CallerMemberNameAttribute
-        CompilerFeatureRequiredAttribute
-        IsExternalInit
-        OverloadResolutionPriorityAttribute
-        RequiredMemberAttribute
+    Runtime
+        CompilerServices
+            CallerArgumentExpressionAttribute
+            CallerFilePathAttribute
+            CallerLineNumberAttribute
+            CallerMemberNameAttribute
+            CompilerFeatureRequiredAttribute
+            IsExternalInit
+            OverloadResolutionPriorityAttribute
+            RawArrayData
+            RawData
+            RequiredMemberAttribute
+        InteropServices
+            MemoryMarshal
+                GetArrayDataReference(T[])
     ; FutureArgumentException
     ArgumentException
         ThrowIfNullOrEmpty()
