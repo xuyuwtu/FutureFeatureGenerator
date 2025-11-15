@@ -81,6 +81,7 @@ System
         Dictionary
             TryAdd()
         KeyValuePair
+        KeyValuePair`2
             Deconstruct()
     Diagnostics.CodeAnalysis
         AllowNullAttribute

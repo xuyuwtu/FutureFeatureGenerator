@@ -241,7 +241,7 @@ internal class NodeClass : HasChildrenNode
             Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
             writer.Write(modifier);
             writer.Write(" static partial class Future");
-            writer.WriteLine(Name);
+            writer.WriteLine(Name.Contains('`') ? Name.Replace('`', '_') : Name);
             writer.WriteLine('{');
             writer.Indent++;
             var writeMethods = Children.Cast<NodeMethod>();

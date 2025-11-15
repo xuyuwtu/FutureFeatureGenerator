@@ -1,16 +1,10 @@
-﻿#region
-#endregion
-namespace System.Collections.Generic;
-
-internal static partial class FutureKeyValuePair
-{
-    #region Deconstruct()
+﻿namespace System.Collections.Generic;
 #if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
-    internal static void Deconstruct<TKey, TValue>(this in KeyValuePair<TKey, TValue> self, out TKey key, out TValue value)
+internal static partial class KeyValuePair
+{
+    public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value)
     {
-        key = self.Key;
-        value = self.Value;
+        return new KeyValuePair<TKey, TValue>(key, value);
     }
-#endif
-    #endregion
 }
+#endif

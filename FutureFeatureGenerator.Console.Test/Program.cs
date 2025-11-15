@@ -24,18 +24,14 @@ internal class Program
             """
             @UseExtensions true
             @UseRealCondition true
-            System public
-                Char
-                    *
-                Range
-                Index
-                Runtime.CompilerServices
-                    *
-            ThrowIf()
-            ThrowIfEqual()
+            System.Collections.Generic
+                KeyValuePair
+                KeyValuePair`2
+                    Deconstruct()
             """, FeatureGenerator.FileName)]);
         generatorDriver = generatorDriver.RunGenerators(compilation);
         var runResult = generatorDriver.GetRunResult();
+        Debug.Assert(runResult.GeneratedTrees.Length != 0);
         var result = runResult.Results[0];
         if (result.Diagnostics.Length != 0)
         {

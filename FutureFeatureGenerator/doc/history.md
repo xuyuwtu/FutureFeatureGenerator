@@ -1,4 +1,23 @@
 ﻿# 变更
+
+## v1.7.0
+### 添加
+```
+System.Collections.Generic
+    KeyValuePair
+```
+### 修改
+```
+;old
+System.Collections.Generic
+    KeyValuePair
+        Deconstruct()
+;new
+System.Collections.Generic
+    KeyValuePair`2
+        Deconstruct()
+```
+
 ## v1.6.0
 ### 修复
 - 生成GeneratedCodeAttribute时对于System.Collections.Generic命名空间错误的问题
