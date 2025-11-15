@@ -1,4 +1,5 @@
 ﻿using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -207,7 +208,7 @@ internal class NodeClass : HasChildrenNode
         if (!NodeMethod.CondititonFuncCache.TryGetValue(condition, out var func))
         {
             func = Utils.GetConditionFunc(condition);
-            NodeMethod.CondititonFuncCache.Add(condition, func);
+            NodeMethod.CondititonFuncCache.TryAdd(condition, func);
         }
         Condition = condition;
     }
@@ -319,7 +320,7 @@ internal class NodeClass : HasChildrenNode
 }
 internal class NodeMethod : NodeBase
 {
-    internal static readonly Dictionary<string, Func<string[], bool>> CondititonFuncCache = new(ReferenceEqualityComparer<string>.Instance);
+    internal static readonly ConcurrentDictionary<string, Func<string[], bool>> CondititonFuncCache = new(ReferenceEqualityComparer<string>.Instance);
     internal static string TrueCondition = null!;
     public override bool IsLeaf => true;
     public bool IsNotExtension { get; set; }
@@ -333,7 +334,7 @@ internal class NodeMethod : NodeBase
         if(!CondititonFuncCache.TryGetValue(condition, out var func))
         {
             func = Utils.GetConditionFunc(condition);
-            CondititonFuncCache.Add(condition, func);
+            CondititonFuncCache.TryAdd(condition, func);
         }
         Condition = condition;
     }

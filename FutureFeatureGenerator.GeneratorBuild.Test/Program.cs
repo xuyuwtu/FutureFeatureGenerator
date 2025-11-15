@@ -16,26 +16,39 @@ internal class Program
         var baseCompilation = CSharpCompilation.Create(
             "Test",
             [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } }", parseOptions)],
-            ReferenceAssemblies.NetStandard.NetStandard20.ResolveAsync(null, default).Result,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            ReferenceAssemblies.NetStandard.NetStandard20.AddPackages([
+                new PackageIdentity("System.Memory", "4.5.5")
+            ]).ResolveAsync(null, default).Result,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+        
         var baseGeneratorDriver = CSharpGeneratorDriver.Create(new FeatureGenerator());
 
-        var normalGeneratorDriver = baseGeneratorDriver.AddAdditionalTexts([MyText.From(
-            """
-            @UseRealCondition true
-            *
-            """, FeatureGenerator.FileName)]);
-        var extensionGeneratorDriver = baseGeneratorDriver.AddAdditionalTexts([MyText.From(
-            """
-            @UseRealCondition true
-            @UseExtensions true
-            *
-            """, FeatureGenerator.FileName)]);
+        Task<GeneratorDriver>[] tasks = [
+            new Task<GeneratorDriver>(() => baseGeneratorDriver.AddAdditionalTexts([MyText.From(
+                """
+                @UseRealCondition true
+                *
+                """, FeatureGenerator.FileName)]).RunGenerators(baseCompilation)),
+            new Task<GeneratorDriver>(() => baseGeneratorDriver.AddAdditionalTexts([MyText.From(
+                """
+                @UseRealCondition true
+                @UseExtensions true
+                *
+                """, FeatureGenerator.FileName)]).RunGenerators(baseCompilation)),
+        ];
+        foreach (var t in tasks)
+        {
+            t.Start();
+        }
+        Task.WhenAll(tasks);
+        var normalGeneratorDriver = tasks[0].Result;
+        var extensionGeneratorDriver = tasks[1].Result;
 
         // generated SyntaxTree LanguageVersion is CSharp13 not Preview will throw Exception
         //RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
 
         var runResult = normalGeneratorDriver.GetRunResult();
+        Debug.Assert(runResult.GeneratedTrees.Length != 0);
         var emitCompilation = baseCompilation.AddSyntaxTrees(runResult.GeneratedTrees.Select(x => CSharpSyntaxTree.ParseText(x.GetText(), parseOptions)));
         using var peStream = new MemoryStream();
         var emitResult = emitCompilation.Emit(peStream);
@@ -46,6 +59,7 @@ internal class Program
         }
 
         runResult = extensionGeneratorDriver.GetRunResult();
+        Debug.Assert(runResult.GeneratedTrees.Length != 0);
         emitCompilation = baseCompilation.AddSyntaxTrees(runResult.GeneratedTrees.Select(x => CSharpSyntaxTree.ParseText(x.GetText(), parseOptions)));
         peStream.Position = 0;
         peStream.SetLength(0);

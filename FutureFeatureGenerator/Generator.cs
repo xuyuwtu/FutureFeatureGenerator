@@ -32,6 +32,7 @@ public class FeatureGenerator :
     private string[] NodesFullName = [];
     internal string[] NodesNamespace = [];
     private bool _isInitialized = false;
+    private object _lock = new();
     static FeatureGenerator()
     {
         NodeMethod.TrueCondition = conditionCache.GetOrAdd("true");
@@ -46,13 +47,17 @@ public class FeatureGenerator :
 #if UseIIncrementalGenerator
         context.RegisterSourceOutput(context.AdditionalTextsProvider.Where(static text => string.Equals(FileName, Path.GetFileName(text.Path), StringComparison.OrdinalIgnoreCase)).Collect().Combine(context.CompilationProvider), Execute);
 #endif
-        if (!Volatile.Read(ref _isInitialized))
+        lock (_lock)
         {
             Init();
         }
     }
     private void Init()
     {
+        if (_isInitialized)
+        {
+            return; 
+        }
         _isInitialized = true;
         var assembly = Assembly.GetExecutingAssembly();
         int id = 0;
