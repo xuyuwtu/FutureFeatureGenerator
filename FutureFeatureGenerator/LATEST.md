@@ -1,39 +1,50 @@
-﻿## 1.6.0
+﻿## 1.7.0
 ### Features
-- add new method
+- add
 ```
 System
-    ArraySegment
-        CopyTo(T[])
-        CopyTo(T[],int)
-        CopyTo(ArraySegment<T>)
-        Slice(int)
-        Slice(int,int)
-        ToArray()
+    Collections.Generic
+        KeyValuePair
     Math
-        Clamp(byte,byte,byte)
-        Clamp(decimal,decimal,decimal)
-        Clamp(double,double,double)
-        Clamp(short,short,short)
-        Clamp(int,int,int)
-        Clamp(long,long,long)
-        Clamp(sbyte,sbyte,sbyte)
-        Clamp(float,float,float)
-        Clamp(ushort,ushort,ushort)
-        Clamp(uint,uint,uint)
-        Clamp(ulong,ulong,ulong)
-        Clamp(nint,nint,nint)
-        Clamp(nuint,nuint,nuint)
-    String
-        EndsWith(char) 
-        IndexOf(char,StringComparison) 
-        GetHashCode(StringComparison) 
-        StartsWith(char) 
-    StringComparer
-        FromComparison(StringComparison)
+        Tau
+    MathF
+        Tau
+    Runtime
+        CompilerServices
+            RawArrayData
+            RawData
+        InteropServices
+            MemoryMarshal
+                GetArrayDataReference(T[])
+    TimeSpan
+        HoursPerDay
+        MicrosecondsPerDay
+        MicrosecondsPerHour
+        MicrosecondsPerMillisecond
+        MicrosecondsPerMinute
+        MicrosecondsPerSecond
+        MillisecondsPerDay
+        MillisecondsPerHour
+        MillisecondsPerMinute
+        MillisecondsPerSecond
+        MinutesPerDay
+        MinutesPerHour
+        NanosecondsPerTick
+        SecondsPerDay
+        SecondsPerHour
+        SecondsPerMinute
+        TicksPerMicrosecond
 ```
-- The effect of the UseRealCondition option has changed slightly
-- `ObjectDisposedException.ThrowIf(Boolean,Object)` rename to `ObjectDisposedException.ThrowIf(bool,object)`
-- `ObjectDisposedException.ThrowIf(Boolean,Type)` rename to `ObjectDisposedException.ThrowIf(bool,Type)`
+- change
+```
+;old
+System.Collections.Generic
+    KeyValuePair
+        Deconstruct()
+;new
+System.Collections.Generic
+    KeyValuePair`2
+        Deconstruct()
+```
 ### Bug Fixes
-- correct namespace for GeneratedCodeAttribute in `System.Collections.Generic`
+- ArgumentException occurred during the initial build of a multi-threaded environment

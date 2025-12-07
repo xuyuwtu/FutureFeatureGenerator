@@ -1,11 +1,17 @@
 ﻿# 变更
 
 ## v1.7.0
+### 修复
+- 修复多线程环境下生成可能出现ArgumentException的问题
 ### 添加
 ```
 System
     Collections.Generic
         KeyValuePair
+    Math
+        Tau
+    MathF
+        Tau
     Runtime
         CompilerServices
             RawArrayData
@@ -13,6 +19,24 @@ System
         InteropServices
             MemoryMarshal
                 GetArrayDataReference(T[])
+    TimeSpan
+        HoursPerDay
+        MicrosecondsPerDay
+        MicrosecondsPerHour
+        MicrosecondsPerMillisecond
+        MicrosecondsPerMinute
+        MicrosecondsPerSecond
+        MillisecondsPerDay
+        MillisecondsPerHour
+        MillisecondsPerMinute
+        MillisecondsPerSecond
+        MinutesPerDay
+        MinutesPerHour
+        NanosecondsPerTick
+        SecondsPerDay
+        SecondsPerHour
+        SecondsPerMinute
+        TicksPerMicrosecond
 ```
 ### 修改
 ```
