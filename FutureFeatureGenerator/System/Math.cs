@@ -4,6 +4,12 @@ namespace System;
 
 internal static partial class FutureMath
 {
+    #region Tau
+#if !NET5_0_OR_GREATER
+    internal const double Tau = 6.2831853071795862;
+#endif
+    #endregion
+
     #region Clamp(byte,byte,byte)
     [Alias(nameof(Clamp))]
 #if !(NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
@@ -27,7 +33,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(decimal,decimal,decimal)
     [Alias(nameof(Clamp))]
@@ -52,7 +58,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(double,double,double)
     [Alias(nameof(Clamp))]
@@ -77,7 +83,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(short,short,short)
     [Alias(nameof(Clamp))]
@@ -102,7 +108,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(int,int,int)
     [Alias(nameof(Clamp))]
@@ -127,7 +133,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(long,long,long)
     [Alias(nameof(Clamp))]
@@ -152,7 +158,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(sbyte,sbyte,sbyte)
     [Alias(nameof(Clamp))]
@@ -177,7 +183,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(float,float,float)
     [Alias(nameof(Clamp))]
@@ -202,7 +208,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(ushort,ushort,ushort)
     [Alias(nameof(Clamp))]
@@ -227,7 +233,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(uint,uint,uint)
     [Alias(nameof(Clamp))]
@@ -252,7 +258,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(ulong,ulong,ulong)
     [Alias(nameof(Clamp))]
@@ -277,7 +283,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(nint,nint,nint)
     [Alias(nameof(Clamp))]
@@ -302,7 +308,7 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 
     #region Clamp(nuint,nuint,nuint)
     [Alias(nameof(Clamp))]
@@ -327,5 +333,5 @@ internal static partial class FutureMath
         return value;
     }
 #endif
-    #endregion
+#endregion
 }

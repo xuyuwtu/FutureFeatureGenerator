@@ -174,6 +174,7 @@ System
         IsSubnormal()
     Index
     Math
+        Tau
         Clamp(byte,byte,byte)
         Clamp(decimal,decimal,decimal)
         Clamp(double,double,double)
@@ -187,6 +188,8 @@ System
         Clamp(ulong,ulong,ulong)
         Clamp(nint,nint,nint)
         Clamp(nuint,nuint,nuint)
+    MathF
+        Tau
     ObjectDisposedException
         ;ThrowIf()
         ThrowIf(bool,object)
@@ -204,6 +207,24 @@ System
         StartsWith(char)
     StringComparer
         FromComparison(StringComparison)
+    TimeSpan
+        HoursPerDay
+        MicrosecondsPerDay
+        MicrosecondsPerHour
+        MicrosecondsPerMillisecond
+        MicrosecondsPerMinute
+        MicrosecondsPerSecond
+        MillisecondsPerDay
+        MillisecondsPerHour
+        MillisecondsPerMinute
+        MillisecondsPerSecond
+        MinutesPerDay
+        MinutesPerHour
+        NanosecondsPerTick
+        SecondsPerDay
+        SecondsPerHour
+        SecondsPerMinute
+        TicksPerMicrosecond
     Type
         GetConstructor()
         GetMethod()
