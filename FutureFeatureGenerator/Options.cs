@@ -1,10 +1,39 @@
-﻿namespace FutureFeatureGenerator;
+﻿using System.Runtime.CompilerServices;
+
+namespace FutureFeatureGenerator;
 
 internal class Options
 {
-    public bool UseExtensions { get; set; } = false;
-    public bool UseRealCondition { get; set; } = false;
-    public bool DisableAddDependencies { get; set; } = false;
+    private Dictionary<string, bool> _values = new(StringComparer.OrdinalIgnoreCase);
+    public bool UseExtensions
+    {
+        get => GetValue();
+        set => SetValue(value);
+    }
+    public bool UseRealCondition
+    {
+        get => GetValue();
+        set => SetValue(value);
+    }
+    public bool DisableAddDependencies
+    {
+        get => GetValue();
+        set => SetValue(value);
+    }
+    private bool GetValue([CallerMemberName] string memberName = "")
+    {
+        return _values.TryGetValue(memberName, out var value) ? value : false;
+    }
+    private void SetValue(bool value, [CallerMemberName] string memberName = "")
+    {
+        _values[memberName] = value;
+    }
+    public Options()
+    {
+        UseExtensions = false;
+        UseRealCondition = false;
+        DisableAddDependencies = false;
+    }
     public void ExecuteChange(ReadOnlySpan<char> line)
     {
         bool result;
@@ -14,18 +43,14 @@ internal class Options
             return;
         }
         var settingName = line.Slice(tuples[0]);
-        if (settingName.Equals(nameof(UseExtensions).AsSpan(), StringComparison.OrdinalIgnoreCase))
+        foreach (var name in _values.Keys)
         {
-            if (bool.TryParse(line.Slice(tuples[1]).ToString(), out result))
+            if (settingName.Equals(name.AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
-                UseExtensions = result;
-            }
-        }
-        else if (settingName.Equals(nameof(UseRealCondition).AsSpan(), StringComparison.OrdinalIgnoreCase))
-        {
-            if (bool.TryParse(line.Slice(tuples[1]).ToString(), out result))
-            {
-                UseRealCondition = result;
+                if (bool.TryParse(line.Slice(tuples[1]).ToString(), out result))
+                {
+                    SetValue(result, name);
+                }
             }
         }
     }
