@@ -388,7 +388,7 @@ public class FeatureGenerator :
                 trimmedLine = trimmedLine.Slice(ranges[0]);
             }
             var nameList = trimmedLine.Split(Utils.PointSeparator);
-            if(newDepth == 0 && nameList.Count == 1)
+            if (newDepth == 0 && nameList.Count == 1)
             {
                 var checkName = trimmedLine.Slice(nameList[0]).ToString();
                 var nodes = AllLeafNodes.Where(x => string.Equals(checkName, x.Name) || string.Equals(checkName, x.AliasName));
@@ -428,7 +428,7 @@ public class FeatureGenerator :
                         additionalNodes.Add(foundNode);
                     }
                 }
-                if(newDepthNode is null)
+                if (newDepthNode is null)
                 {
                     break;
                 }
@@ -441,7 +441,7 @@ public class FeatureGenerator :
         }
         if (options.AutoAddLangType)
         {
-            additionalNodes.AddRange(AllLeafNodes.OfType<NodeClass>().Where(x => x.LanguageVersion.HasValue && (int)x.LanguageVersion.Value < (int)csharpCompilation.LanguageVersion));
+            additionalNodes.AddRange(AllLeafNodes.OfType<NodeClass>().Where(x => x.LanguageVersion.HasValue && (int)x.LanguageVersion.Value <= (int)csharpCompilation.LanguageVersion));
         }
         if (!additionalNodesFromAll && !options.DisableAddDependencies)
         {
@@ -461,12 +461,12 @@ public class FeatureGenerator :
             {
                 var index = i + offset;
                 var node = additionalNodes[index];
-                if(node is NodeMethod nodeMethod && !nodeMethod.IsConditionTrue(options.UseRealCondition, preprocessorSymbolNames))
+                if (node is NodeMethod nodeMethod && !nodeMethod.IsConditionTrue(options.UseRealCondition, preprocessorSymbolNames))
                 {
                     additionalNodes.RemoveAt(index);
                     offset--;
                 }
-                else if(node is NodeClass nodeClass && !nodeClass.IsConditionTrue(preprocessorSymbolNames))
+                else if (node is NodeClass nodeClass && !nodeClass.IsConditionTrue(preprocessorSymbolNames))
                 {
                     additionalNodes.RemoveAt(index);
                     offset--;

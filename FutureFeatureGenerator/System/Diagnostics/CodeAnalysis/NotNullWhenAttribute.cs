@@ -1,4 +1,5 @@
 ﻿namespace System.Diagnostics.CodeAnalysis;
+[LangVersion(FutureCSharpLanguageVersion.CSharp8)]
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
 internal sealed class NotNullWhenAttribute : Attribute

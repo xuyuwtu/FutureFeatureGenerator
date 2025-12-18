@@ -1,6 +1,7 @@
 ﻿namespace System;
 [RequireType(nameof(System.Index))]
 [RequireType(nameof(System.Diagnostics.CodeAnalysis.NotNullWhenAttribute))]
+[LangVersion(FutureCSharpLanguageVersion.CSharp8)]
 #if !(NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
 internal readonly struct Range : IEquatable<Range>
 {

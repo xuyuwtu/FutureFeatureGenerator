@@ -1,4 +1,5 @@
 ﻿namespace System.Diagnostics.CodeAnalysis;
+[LangVersion(FutureCSharpLanguageVersion.CSharp9)]
 #if !NET5_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
 internal sealed class MemberNotNullAttribute : Attribute

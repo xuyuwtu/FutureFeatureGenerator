@@ -13,7 +13,7 @@ internal class Program
         var compilation = CSharpCompilation.Create(
             "Test", 
             [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } }", new CSharpParseOptions(
-                LanguageVersion.CSharp13, 
+                LanguageVersion.CSharp10, 
                 //preprocessorSymbols: ["NETCOREAPP3_0_OR_GREATER", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER"]))], 
                 preprocessorSymbols: ["NETSTANDARD", "NETSTANDARD2_0_OR_GREATER"]))], 
             //ReferenceAssemblies.Net.Net60.ResolveAsync(null, default).Result, 
@@ -22,12 +22,7 @@ internal class Program
         var csharpGeneratorDriver = CSharpGeneratorDriver.Create(new FeatureGenerator());
         var generatorDriver = csharpGeneratorDriver.AddAdditionalTexts([MyText.From(
             """
-            @UseExtensions true
-            @UseRealCondition true
-            System.Collections.Generic
-                KeyValuePair
-                KeyValuePair`2
-                    Deconstruct()
+            @AutoAddLangType true
             """, FeatureGenerator.FileName)]);
         generatorDriver = generatorDriver.RunGenerators(compilation);
         var runResult = generatorDriver.GetRunResult();

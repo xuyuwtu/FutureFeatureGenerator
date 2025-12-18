@@ -1,4 +1,5 @@
 ﻿namespace System.Runtime.CompilerServices;
+[LangVersion(FutureCSharpLanguageVersion.CSharp10)]
 #if !NET6_0_OR_GREATER
 [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 internal sealed class CallerArgumentExpressionAttribute : Attribute
