@@ -29,14 +29,20 @@
 		<Compile Include="*.cs" />
 		<Compile Include="System\ArgumentNullException.cs" />
 		<Compile Include="System\ArgumentOutOfRangeException.cs" />
-		<Compile Include="System\RequireTypeAttribute.cs" />
 		<Compile Include="System\Runtime\CompilerServices\CallerArgumentExpressionAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\DisallowNullAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\MaybeNullWhenAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullAttribute.cs" />
 		<Compile Include="System\Diagnostics\CodeAnalysis\NotNullWhenAttribute.cs" />
+
+		<Compile Include="System\FutureCSharpLanguageVersion.cs" />
+		<Compile Include="System\LangVersionAttribute.cs" />
+		<Compile Include="System\RequireTypeAttribute.cs" />
+		
 		<EmbeddedResource Include="System\**\*.cs" />
 		<EmbeddedResource Remove="System\AliasAttribute.cs" />
+		<EmbeddedResource Remove="System\FutureCSharpLanguageVersion.cs" />
+		<EmbeddedResource Remove="System\LangVersionAttribute.cs" />
 		<EmbeddedResource Remove="System\RequireTypeAttribute.cs" />
 	</ItemGroup>
 

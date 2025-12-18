@@ -21,6 +21,7 @@ public class FeatureGenerator :
     private static readonly StringCache conditionCache = new();
     private readonly Dictionary<int, string> modifierCache = [];
     private static readonly Regex requireTypeMatcher = new(@$"\[{nameof(RequireType)}\(nameof\((.*?)\)\)\]");
+    private static readonly Regex langVersionMatcher = new(@$"\[{nameof(LangVersion)}\(FutureCSharpLanguageVersion.(CSharp.*?)\)\]");
     public const string FileName = "FutureFeature.txt";
     public static string Version { get; }
     const char commentChar = ';';
@@ -103,9 +104,15 @@ public class FeatureGenerator :
                 text = sr.ReadLine();
                 Match match;
                 var deps = new List<object>();
+                FutureCSharpLanguageVersion? version = null;
                 while ((match = requireTypeMatcher.Match(text)).Success)
                 {
                     deps.Add(match.Groups[1].Value);
+                    text = sr.ReadLine();
+                }
+                if((match = langVersionMatcher.Match(text)).Success)
+                {
+                    version = (FutureCSharpLanguageVersion)Enum.Parse(typeof(FutureCSharpLanguageVersion), match.Groups[1].Value);
                     text = sr.ReadLine();
                 }
                 if (!text.StartsWith("#if "))
@@ -146,7 +153,8 @@ public class FeatureGenerator :
                     Dependencies = [.. deps],
                     IsMaster = true,
                     Lines = [.. lines],
-                    Id = id++
+                    Id = id++,
+                    LanguageVersion = version,
                 };
                 node.AddChild(nodeClass);
             }
@@ -430,6 +438,10 @@ public class FeatureGenerator :
                 depthNode.Push(newDepthNode);
             }
             depth++;
+        }
+        if (options.AutoAddLangType)
+        {
+            additionalNodes.AddRange(AllLeafNodes.OfType<NodeClass>().Where(x => x.LanguageVersion.HasValue && (int)x.LanguageVersion.Value < (int)csharpCompilation.LanguageVersion));
         }
         if (!additionalNodesFromAll && !options.DisableAddDependencies)
         {

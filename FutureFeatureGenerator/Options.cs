@@ -20,6 +20,11 @@ internal class Options
         get => GetValue();
         set => SetValue(value);
     }
+    public bool AutoAddLangType
+    {
+        get => GetValue();
+        set => SetValue(value);
+    }
     private bool GetValue([CallerMemberName] string memberName = "")
     {
         return _values.TryGetValue(memberName, out var value) ? value : false;
@@ -33,6 +38,7 @@ internal class Options
         UseExtensions = false;
         UseRealCondition = false;
         DisableAddDependencies = false;
+        AutoAddLangType = false;
     }
     public void ExecuteChange(ReadOnlySpan<char> line)
     {

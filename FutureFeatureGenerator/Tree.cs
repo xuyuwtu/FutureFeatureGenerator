@@ -203,6 +203,7 @@ internal class NodeClass : HasChildrenNode
     public int ModifierLineIndex { get; set; } = -1;
     public string[]? Lines { get; set; }
     public object[]? Dependencies { get; set; } 
+    public FutureCSharpLanguageVersion? LanguageVersion { get; set; }
     public NodeClass(string condition, string name) : base(NodeType.Class, name)
     {
         if (!NodeMethod.CondititonFuncCache.TryGetValue(condition, out var func))
