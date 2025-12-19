@@ -120,11 +120,21 @@ public class FeatureGenerator :
                     throw new InvalidDataException($"{resourceName} line:{sr.CurrentLine} must StartWith '#if '");
                 }
                 var condition = conditionCache.GetOrAdd(text.Substring("#if ".Length).Trim());
+                var checkLangVersion = true;
                 var lines = new List<string>();
                 var modifierIndex = -1;
                 while (!sr.EndOfStream)
                 {
                     text = sr.ReadLine();
+                    if (checkLangVersion)
+                    {
+                        if ((match = langVersionMatcher.Match(text)).Success)
+                        {
+                            version = (FutureCSharpLanguageVersion)Enum.Parse(typeof(FutureCSharpLanguageVersion), match.Groups[1].Value);
+                            text = sr.ReadLine();
+                        }
+                        checkLangVersion = false;
+                    }
                     if (text.StartsWith(Modifiers.Internal))
                     {
                         lines.Add(text.Substring(Modifiers.Internal.Length + 1));

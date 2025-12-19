@@ -35,6 +35,9 @@ public class GeneratorTest
             @AutoAddLangType true
             """, NetStandard20References, LanguageVersion.CSharp11);
         string[] shouldGeneratedNames = [
+            nameof(CallerFilePathAttribute),
+            nameof(CallerLineNumberAttribute),
+            nameof(CallerMemberNameAttribute),
             nameof(Index),
             nameof(Range),
             nameof(AllowNullAttribute),
