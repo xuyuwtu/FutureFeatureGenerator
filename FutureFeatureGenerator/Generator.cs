@@ -3,8 +3,8 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -261,7 +261,7 @@ public class FeatureGenerator :
         }
     }
 #if UseIIncrementalGenerator
-    private unsafe void Execute(SourceProductionContext context, (ImmutableArray<AdditionalText> additionalFiles, Compilation compilation) data)
+    private void Execute(SourceProductionContext context, (ImmutableArray<AdditionalText> additionalFiles, Compilation compilation) data)
 #else
     public unsafe void Execute(GeneratorExecutionContext context)
 #endif
@@ -280,15 +280,6 @@ public class FeatureGenerator :
 #else
         var compilation = context.Compilation;
 #endif
-        if (compilation is not CSharpCompilation csharpCompilation)
-        {
-            return;
-        }
-        var compilationLanguageVersion = csharpCompilation.LanguageVersion;
-        if (compilationLanguageVersion == LanguageVersion.Default)
-        {
-            compilationLanguageVersion = LanguageVersion.Latest;
-        }
         var additionalText = additionalFiles.FirstOrDefault(x => string.Equals(FileName, Path.GetFileName(x.Path), StringComparison.OrdinalIgnoreCase));
         if (additionalText is null)
         {
@@ -319,9 +310,23 @@ public class FeatureGenerator :
 #else
         var lines = File.ReadAllLines(additionalText.Path);
 #endif
-        if (lines.Length == 0)
+        var result = GetResult(lines, compilation);
+        if (result is null)
         {
             return;
+        }
+        context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
+    }
+
+    private string? GetResult(string[] lines, Compilation compilation)
+    {
+        if (compilation is not CSharpCompilation csharpCompilation)
+        {
+            return null;
+        }
+        if (lines.Length == 0)
+        {
+            return null;
         }
         var additionalNodes = new List<NodeBase>();
         var additionalNodesFromAll = false;
@@ -475,11 +480,11 @@ public class FeatureGenerator :
         }
         if (additionalNodes.Count == 0)
         {
-            return;
+            return null;
         }
-        //var itw = new StreamIndentedTextWriter(writeStringCache, memoryStream);
-        var memoryStream = new MemoryStream();
-        var itw = new IndentedTextWriter(new StreamWriter(memoryStream) { AutoFlush = true });
+        var sb = new StringBuilder();
+        var sw = new StringWriter(sb);
+        var itw = new IndentedTextWriter(sw);
         itw.WriteLine("#nullable enable");
         foreach (var additionalNode in additionalNodes)
         {
@@ -487,9 +492,7 @@ public class FeatureGenerator :
             itw.WriteLine(NodesFullName[additionalNode.Id]);
         }
         BuildTree(additionalNodes, AllNodes).Write(itw, options, modifierCache, NodesNamespace);
-        memoryStream.Position = 0;
-        var result = new StreamReader(memoryStream).ReadToEnd();
-        context.AddSource($"{nameof(FutureFeatureGenerator)}.g.cs", result);
+        return sb.ToString();
     }
 
     private static bool TryGetDepth(ReadOnlySpan<char> line, out int depth)

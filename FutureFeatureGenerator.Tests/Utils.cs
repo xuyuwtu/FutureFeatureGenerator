@@ -28,13 +28,17 @@ static class Utils
             return Array.Empty<string>();
         }
         var tree = result.GeneratedSources[0].SyntaxTree;
-        var array = tree.GetRoot().ChildNodes().First().GetLeadingTrivia().ToArray();
-        var count = array.Length / 2;
+        var root = tree.GetRoot();
+        var childNodes = root.ChildNodes();
+        var firstNode = childNodes.First();
+        var leadingTrivial = firstNode.GetLeadingTrivia();
+        var array = leadingTrivial.Where(static x => x.RawKind == (int)SyntaxKind.SingleLineCommentTrivia).ToArray();
+        var count = array.Length;
         var names = new string[count];
         var text = tree.GetText();
         for (int i = 0; i < count; i++)
         {
-            var span = array[i * 2].Span;
+            var span = array[i].Span;
             var index = -1;
             for (int j = span.End; j >= span.Start; j--)
             {
