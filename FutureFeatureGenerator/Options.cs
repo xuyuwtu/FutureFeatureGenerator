@@ -25,6 +25,7 @@ internal class Options
         get => GetValue();
         set => SetValue(value);
     }
+    static string[] s_keys = [nameof(UseExtensions), nameof(UseRealCondition), nameof(DisableAddDependencies), nameof(AutoAddLangType)];
     private bool GetValue([CallerMemberName] string memberName = "")
     {
         return _values.TryGetValue(memberName, out var value) ? value : false;
@@ -35,10 +36,10 @@ internal class Options
     }
     public Options()
     {
-        UseExtensions = false;
-        UseRealCondition = false;
-        DisableAddDependencies = false;
-        AutoAddLangType = false;
+        foreach (var key in s_keys)
+        {
+            SetValue(false, key);
+        }
     }
     public void ExecuteChange(ReadOnlySpan<char> line)
     {
@@ -49,7 +50,7 @@ internal class Options
             return;
         }
         var settingName = line.Slice(tuples[0]);
-        foreach (var name in _values.Keys)
+        foreach (var name in s_keys)
         {
             if (settingName.Equals(name.AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
