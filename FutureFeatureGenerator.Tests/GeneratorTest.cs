@@ -44,7 +44,6 @@ public class GeneratorTest
             nameof(DisallowNullAttribute),
             nameof(DoesNotReturnAttribute),
             nameof(DoesNotReturnIfAttribute),
-            nameof(ExperimentalAttribute),
             nameof(MaybeNullAttribute),
             nameof(MaybeNullWhenAttribute),
             nameof(MemberNotNullAttribute),
