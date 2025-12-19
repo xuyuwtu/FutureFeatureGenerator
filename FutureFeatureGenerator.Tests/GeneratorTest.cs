@@ -57,7 +57,8 @@ public class GeneratorTest
             nameof(CallerArgumentExpressionAttribute),
             nameof(RequiredMemberAttribute),
             nameof(SetsRequiredMembersAttribute),
-            nameof(CompilerFeatureRequiredAttribute)
+            nameof(CompilerFeatureRequiredAttribute),
+            nameof(UnscopedRefAttribute),
             ];
         Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
     }
