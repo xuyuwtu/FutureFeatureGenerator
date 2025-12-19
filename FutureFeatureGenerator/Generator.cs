@@ -101,7 +101,10 @@ public class FeatureGenerator :
             var text = sr.ReadLine();
             if (text.StartsWith("namespace"))
             {
-                text = sr.ReadLine();
+                do
+                {
+                    text = sr.ReadLine();
+                } while (string.IsNullOrWhiteSpace(text));
                 Match match;
                 var deps = new List<object>();
                 FutureCSharpLanguageVersion? version = null;

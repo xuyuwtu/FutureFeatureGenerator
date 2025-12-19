@@ -7,5 +7,7 @@
 		IsExternalInit
 		RequiredMemberAttribute
 		CompilerFeatureRequiredAttribute
+		ModuleInitializerAttribute
+		SkipLocalsInitAttribute
 	ArgumentException
 		ThrowIfNullOrEmpty()

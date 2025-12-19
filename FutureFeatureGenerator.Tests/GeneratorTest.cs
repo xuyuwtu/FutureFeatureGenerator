@@ -53,8 +53,11 @@ public class GeneratorTest
             nameof(NotNullIfNotNullAttribute),
             nameof(NotNullWhenAttribute),
             nameof(IsExternalInit),
+            nameof(ModuleInitializerAttribute),
+            nameof(SkipLocalsInitAttribute),
             nameof(CallerArgumentExpressionAttribute),
             nameof(RequiredMemberAttribute),
+            nameof(SetsRequiredMembersAttribute),
             nameof(CompilerFeatureRequiredAttribute)
             ];
         Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
