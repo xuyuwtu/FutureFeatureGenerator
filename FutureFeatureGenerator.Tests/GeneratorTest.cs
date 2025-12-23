@@ -62,4 +62,40 @@ public class GeneratorTest
             ];
         Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
     }
+    [Fact]
+    public void OptionCheck_NewMember_Alias()
+    {
+        var generatedNames = Utils.GetGeneratorTypeFullNames($"""
+            System
+                Type
+                    GetMethod()
+                    GetConstructor()
+                    IsAssignableTo()
+            """, NetStandard20References, LanguageVersion.CSharp7_3);
+        string[] shouldGeneratedNames = [
+                "GetConstructor(BindingFlags,Type[])",
+                "GetMethod(BindingFlags,Type[])",
+                "IsAssignableTo(Type)",
+                nameof(NotNullWhenAttribute),
+        ];
+        Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
+    }
+    [Fact]
+    public void OptionCheck_NewMember()
+    {
+        var generatedNames = Utils.GetGeneratorTypeFullNames($"""
+            System
+                Type
+                    GetConstructor(BindingFlags,Type[])
+                    GetMethod(BindingFlags,Type[])
+                    IsAssignableTo(Type)
+            """, NetStandard20References, LanguageVersion.CSharp7_3);
+        string[] shouldGeneratedNames = [
+                "GetConstructor(BindingFlags,Type[])",
+                "GetMethod(BindingFlags,Type[])",
+                "IsAssignableTo(Type)",
+                nameof(NotNullWhenAttribute),
+        ];
+        Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
+    }
 }
