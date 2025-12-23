@@ -6,7 +6,7 @@ internal static partial class FutureStream
     // System.Span`1
     #region Read(Span<byte>)
     [Alias(nameof(Read))]
-#if !NETCOREAPP2_1_OR_GREATER
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static int Read(this Stream self, Span<byte> buffer)
     {
         byte[] array = Buffers.ArrayPool<byte>.Shared.Rent(buffer.Length);
@@ -31,7 +31,7 @@ internal static partial class FutureStream
     // System.ReadOnlySpan`1
     #region Write(ReadOnlySpan<byte>)
     [Alias(nameof(Write))]
-#if !NETCOREAPP2_1_OR_GREATER
+#if !(NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
     internal static void Write(this Stream self, ReadOnlySpan<byte> buffer)
     {
         byte[] array = Buffers.ArrayPool<byte>.Shared.Rent(buffer.Length);
