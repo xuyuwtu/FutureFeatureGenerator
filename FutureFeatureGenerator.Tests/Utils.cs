@@ -9,16 +9,21 @@ namespace FutureFeatureGenerator.Tests;
 
 static class Utils
 {
-    public static string[] GetGeneratorTypeFullNames(string fileText, ReferenceAssemblies assemblies, LanguageVersion languageVersion = LanguageVersion.Default)
+    public static string[] GetGeneratorTypeFullNames(string fileContent, ReferenceAssemblies assemblies, LanguageVersion languageVersion = LanguageVersion.Default)
     {
-        return GetGeneratorTypeFullNames(fileText, assemblies.ResolveAsync(null, default).Result, languageVersion);
+        return GetGeneratorTypeFullNames(fileContent, assemblies.ResolveAsync(null, default).Result, languageVersion);
     }
-    public static string[] GetGeneratorTypeFullNames(string fileText, ImmutableArray<MetadataReference> references, LanguageVersion languageVersion = LanguageVersion.Default)
+    public static GeneratorDriver GetGeneratorDriver(string fileContent, ImmutableArray<MetadataReference> references, LanguageVersion languageVersion = LanguageVersion.Default)
     {
         var compilation = CSharpCompilation.Create("Test", [CSharpSyntaxTree.ParseText("namespace { class TestClass { } }", new CSharpParseOptions(languageVersion))], references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         var csharpGeneratorDriver = CSharpGeneratorDriver.Create(new FeatureGenerator());
-        var generatorDriver = csharpGeneratorDriver.AddAdditionalTexts([MyText.From(fileText, FeatureGenerator.FileName)]);
+        var generatorDriver = csharpGeneratorDriver.AddAdditionalTexts([MyText.From(fileContent, FeatureGenerator.FileName)]);
         generatorDriver = generatorDriver.RunGenerators(compilation);
+        return generatorDriver;
+    }
+    public static string[] GetGeneratorTypeFullNames(string fileContent, ImmutableArray<MetadataReference> references, LanguageVersion languageVersion = LanguageVersion.Default)
+    {
+        var generatorDriver = GetGeneratorDriver(fileContent, references, languageVersion);
         var runResult = generatorDriver.GetRunResult();
         Assert.Single(runResult.Results);
         var result = runResult.Results[0];

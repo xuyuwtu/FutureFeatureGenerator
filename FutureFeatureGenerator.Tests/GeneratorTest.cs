@@ -1,10 +1,11 @@
-﻿using System.Collections.Immutable;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Testing;
-using System.Runtime.CompilerServices;
 
 namespace FutureFeatureGenerator.Tests;
 
@@ -63,7 +64,38 @@ public class GeneratorTest
         Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
     }
     [Fact]
-    public void OptionCheck_NewMember_Alias()
+    public void OptionCheck_NotWriteGeneratedCodeAttribute()
+    {
+        var driver = Utils.GetGeneratorDriver(nameof(Index), NetStandard20References);
+        var result = driver.GetRunResult();
+        Assert.Single(result.Results);
+        Assert.Single(result.Results[0].GeneratedSources);
+        Assert.Matches(nameof(GeneratedCodeAttribute), result.Results[0].GeneratedSources[0].SourceText.ToString());
+
+        driver = Utils.GetGeneratorDriver($"""
+            @NotWriteGeneratedCodeAttribute true
+            System.{nameof(Index)}
+            """, NetStandard20References);
+        result = driver.GetRunResult();
+        Assert.Single(result.Results);
+        Assert.Single(result.Results[0].GeneratedSources);
+        Assert.DoesNotMatch(nameof(GeneratedCodeAttribute), result.Results[0].GeneratedSources[0].SourceText.ToString());
+    }
+    [Fact]
+    public void OptionCheck_DefaultModifier()
+    {
+        var driver = Utils.GetGeneratorDriver($"""
+            @DefaultModifier public
+            {nameof(Index)}
+            """, NetStandard20References);
+        var result = driver.GetRunResult();
+        Assert.Single(result.Results);
+        Assert.Single(result.Results[0].GeneratedSources);
+        var text = result.Results[0].GeneratedSources[0].SourceText.ToString();
+        Assert.DoesNotMatch("internal readonly", text);
+    }
+    [Fact]
+    public void TypeCheck_NewMember_Alias()
     {
         var generatedNames = Utils.GetGeneratorTypeFullNames($"""
             System
@@ -81,7 +113,7 @@ public class GeneratorTest
         Assert.True(Utils.AllMatch(generatedNames, shouldGeneratedNames));
     }
     [Fact]
-    public void OptionCheck_NewMember()
+    public void TypeCheck_NewMember()
     {
         var generatedNames = Utils.GetGeneratorTypeFullNames($"""
             System

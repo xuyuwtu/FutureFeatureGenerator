@@ -224,14 +224,17 @@ internal class NodeClass : HasChildrenNode
                 modifierRecord[Id] = modifier;
             }
         }
-        modifier ??= Modifiers.Internal;
+        modifier ??= options.DefaultModifier;
         if (IsMaster)
         {
             for (int i = 0; i < Lines!.Length; i++)
             {
                 if (i == ModifierLineIndex)
                 {
-                    Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
+                    if (!options.NotWriteGeneratedCodeAttribute)
+                    {
+                        Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
+                    }
                     writer.Write(modifier);
                     writer.Write(' ');
                 }
@@ -240,7 +243,10 @@ internal class NodeClass : HasChildrenNode
         }
         else
         {
-            Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
+            if (!options.NotWriteGeneratedCodeAttribute)
+            {
+                Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
+            }
             writer.Write(modifier);
             writer.Write(" static partial class Future");
             writer.WriteLine(Name.Contains('`') ? Name.Replace('`', '_') : Name);
@@ -346,8 +352,11 @@ internal class NodeMethod : NodeBase
         {
             if (i == ModifierLineIndex)
             {
-                Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
-                writer.Write(modifierRecord.TryGet(Id) ?? modifierRecord.TryGet(ParentId) ?? Modifiers.Internal);
+                if (!options.NotWriteGeneratedCodeAttribute)
+                {
+                    Utils.WriteGeneratedCodeAttribute(writer, nodesNamespace[Id]);
+                }
+                writer.Write(modifierRecord.TryGet(Id) ?? modifierRecord.TryGet(ParentId) ?? options.DefaultModifier);
                 writer.Write(' ');
             }
             writer.WriteLine(Lines[i]);
