@@ -47,4 +47,43 @@ internal static partial class FutureStream
     }
 #endif
     #endregion
+
+    // System.Span`1
+    // System.IO.Stream.Read(Span<byte>)
+    #region ReadExactly(Span<byte>)
+    [Alias(nameof(ReadExactly))]
+#if !NET7_0_OR_GREATER
+    internal static void ReadExactly(this Stream self, Span<byte> buffer)
+    {
+        int totalRead = 0;
+        while (totalRead < buffer.Length)
+        {
+            int read = self.Read(buffer.Slice(totalRead));
+            if (read == 0)
+            {
+                throw new EndOfStreamException();
+            }
+            totalRead += read;
+        }
+    }
+#endif
+    #endregion
+
+    #region ReadExactly(byte[],int,int)
+#if !NET7_0_OR_GREATER
+    internal static void ReadExactly(this Stream self, byte[] buffer, int offset, int count)
+    {
+        int totalRead = 0;
+        while (totalRead < buffer.Length)
+        {
+            int read = self.Read(buffer, offset + totalRead, count - totalRead);
+            if (read == 0)
+            {
+                throw new EndOfStreamException();
+            }
+            totalRead += read;
+        }
+    }
+#endif
+    #endregion
 }
