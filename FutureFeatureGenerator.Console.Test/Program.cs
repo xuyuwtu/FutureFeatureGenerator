@@ -13,7 +13,7 @@ internal class Program
         var compilation = CSharpCompilation.Create(
             "Test", 
             [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } }", new CSharpParseOptions(
-                LanguageVersion.CSharp10, 
+                (LanguageVersion)1500, 
                 //preprocessorSymbols: ["NETCOREAPP3_0_OR_GREATER", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER"]))], 
                 preprocessorSymbols: ["NETSTANDARD", "NETSTANDARD2_0_OR_GREATER"]))], 
             //ReferenceAssemblies.Net.Net60.ResolveAsync(null, default).Result, 

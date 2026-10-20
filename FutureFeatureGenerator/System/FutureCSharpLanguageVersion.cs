@@ -259,6 +259,21 @@ internal enum FutureCSharpLanguageVersion
     CSharp14 = 1400,
 
     /// <summary>
+    /// C# language version 15.0
+    /// <br/>
+    /// Features:
+    /// <list type="bullet">
+    /// <item><description>Collection expression arguments</description></item>
+    /// <item><description>Unions</description></item>
+    /// <item><description>Non-virtual static members in interfaces</description></item>
+    /// <item><description>Closed class hierarchies</description></item>
+    /// <item><description>Labeled <see langword="break"/> and <see langword="continue"/></description></item>
+    /// <item><description>Extension indexers</description></item>
+    /// </list>
+    /// </summary>
+    CSharp15 = 1500,
+
+    /// <summary>
     /// The latest major supported version.
     /// </summary>
     LatestMajor = int.MaxValue - 2,
