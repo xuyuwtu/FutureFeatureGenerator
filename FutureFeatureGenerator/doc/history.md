@@ -1,4 +1,58 @@
-﻿# 变更
+# 变更
+
+## v1.8.0
+### 修复
+- 修复选项`DisableAddDependencies`无效的问题
+- 修复`Stream`的`Read()`和`Write()`的编译条件
+### 添加
+- 添加选项`AutoAddLangType`，自动为C#语言版本生成所需的类型
+- 添加选项`DefaultModifier`，设置默认修饰符(`internal`/`public`)
+- 添加选项`NotWriteGeneratedCodeAttribute`，不生成`GeneratedCodeAttribute`
+```
+System
+    Array
+        MaxLength
+    Collections.Generic
+        List
+            EnsureCapacity(int)
+        ReferenceEqualityComparer
+    Diagnostics.CodeAnalysis
+        ConstantExpectedAttribute
+        SetsRequiredMembersAttribute
+        UnscopedRefAttribute
+    IO
+        Stream
+            ReadExactly(Span<byte>)
+            ReadExactly(byte[],int,int)
+    Runtime
+        CompilerServices
+            CollectionBuilderAttribute
+            IgnoresAccessChecksToAttribute
+            InterceptsLocationAttribute
+            IUnion
+            ModuleInitializerAttribute
+            SkipLocalsInitAttribute
+            UnionAttribute
+        InteropServices
+            LibraryImportAttribute
+            StringMarshalling
+    Type
+        IsAssignableTo(Type)
+```
+### 修改
+- 选项`UseExtensions`在C#语言版本为14及以上时默认为`true`
+```
+;old
+System
+    Type
+        GetConstructor()
+        GetMethod()
+;new
+System
+    Type
+        GetConstructor(BindingFlags,Type[])
+        GetMethod(BindingFlags,Type[])
+```
 
 ## v1.7.0
 ### 修复

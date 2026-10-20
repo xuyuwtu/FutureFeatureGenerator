@@ -42,14 +42,20 @@ FutureArgumentNullException.ThrowIfNull(arg);
 #endif
 ```
 
-有三个配置项，默认都为`false`
+有六个配置项，默认都为`false`，`UseExtensions`在C#语言版本为14及以上时默认为`true`
 `UseExtensions`会在`static`方法外加上`extensions()`  
 `UseRealCondition`则会使用实际的条件而不是`#if true`，下面是启用语法  
 `DisableAddDependencies`取消自动添加依赖类型和方法
+`AutoAddLangType`自动为C#语言版本生成所需的类型
+`NotWriteGeneratedCodeAttribute`不在生成的代码中写入`GeneratedCodeAttribute`
+`DefaultModifier`设置默认修饰符(默认为`internal`)，值为`internal`或`public`
 ```
 @UseExtensions true
 @UseRealCondition true
 @DisableAddDependencies true
+@AutoAddLangType true
+@NotWriteGeneratedCodeAttribute true
+@DefaultModifier public
 ```
 
 例如:
@@ -84,8 +90,12 @@ System
         KeyValuePair
         KeyValuePair`2
             Deconstruct()
+        List
+            EnsureCapacity(int)
+        ReferenceEqualityComparer
     Diagnostics.CodeAnalysis
         AllowNullAttribute
+        ConstantExpectedAttribute
         DisallowNullAttribute
         DoesNotReturnAttribute
         DoesNotReturnIfAttribute
@@ -97,11 +107,15 @@ System
         NotNullAttribute
         NotNullIfNotNullAttribute
         NotNullWhenAttribute
+        SetsRequiredMembersAttribute
         StringSyntaxAttribute
+        UnscopedRefAttribute
     IO
         Stream
             ;Read()
             Read(Span<byte>)
+            ReadExactly(Span<byte>)
+            ReadExactly(byte[],int,int)
             ;Write()
             Write(ReadOnlySpan<byte>)
     Reflection
@@ -112,15 +126,24 @@ System
             CallerFilePathAttribute
             CallerLineNumberAttribute
             CallerMemberNameAttribute
+            CollectionBuilderAttribute
             CompilerFeatureRequiredAttribute
+            IgnoresAccessChecksToAttribute
+            InterceptsLocationAttribute
             IsExternalInit
+            IUnion
+            ModuleInitializerAttribute
             OverloadResolutionPriorityAttribute
             RawArrayData
             RawData
             RequiredMemberAttribute
+            SkipLocalsInitAttribute
+            UnionAttribute
         InteropServices
+            LibraryImportAttribute
             MemoryMarshal
                 GetArrayDataReference(T[])
+            StringMarshalling
     ; FutureArgumentException
     ArgumentException
         ThrowIfNullOrEmpty()
@@ -135,6 +158,8 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
+    Array
+        MaxLength
     ArraySegment
         CopyTo(T[])
         CopyTo(T[],int)
@@ -227,6 +252,7 @@ System
         SecondsPerMinute
         TicksPerMicrosecond
     Type
-        GetConstructor()
-        GetMethod()
+        GetConstructor(BindingFlags,Type[])
+        GetMethod(BindingFlags,Type[])
+        IsAssignableTo(Type)
 ```

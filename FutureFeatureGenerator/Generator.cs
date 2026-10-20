@@ -346,6 +346,10 @@ public class FeatureGenerator :
         var depth = -1;
         var depthNode = new Stack<HasChildrenNode>();
         var options = new Options();
+        if ((int)csharpCompilation.LanguageVersion >= (int)FutureCSharpLanguageVersion.CSharp14)
+        {
+            options.UseExtensions = true;
+        }
         depthNode.Push(Root);
         modifierCache.Clear();
         for (int i = 0; i < lines.Length; i++)

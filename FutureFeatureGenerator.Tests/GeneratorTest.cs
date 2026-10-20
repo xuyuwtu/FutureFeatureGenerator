@@ -116,6 +116,29 @@ public class GeneratorTest
         Assert.True(constIndex < extensionIndex);
     }
     [Fact]
+    public void OptionCheck_UseExtensionsLangVersion()
+    {
+        var fileContent = $"""
+            System
+                Math
+                    Clamp(int,int,int)
+            """;
+        //C#语言版本为14及以上时UseExtensions默认为true
+        var driver = Utils.GetGeneratorDriver(fileContent, NetStandard20References, (LanguageVersion)1400);
+        var result = driver.GetRunResult();
+        Assert.Single(result.Results);
+        Assert.Single(result.Results[0].GeneratedSources);
+        var text = result.Results[0].GeneratedSources[0].SourceText.ToString();
+        Assert.Contains("extension(Math)", text);
+        //默认语言版本低于C#14时UseExtensions为false
+        var driverDefault = Utils.GetGeneratorDriver(fileContent, NetStandard20References);
+        var resultDefault = driverDefault.GetRunResult();
+        Assert.Single(resultDefault.Results);
+        Assert.Single(resultDefault.Results[0].GeneratedSources);
+        var textDefault = resultDefault.Results[0].GeneratedSources[0].SourceText.ToString();
+        Assert.DoesNotContain("extension(", textDefault);
+    }
+    [Fact]
     public void TypeCheck_NewMember_Alias()
     {
         var generatedNames = Utils.GetGeneratorTypeFullNames($"""

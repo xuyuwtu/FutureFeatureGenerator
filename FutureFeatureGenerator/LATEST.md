@@ -1,50 +1,54 @@
-﻿## 1.7.0
+﻿## 1.8.0
 ### Features
+- change option `UseExtensions` to default to `true` when the C# language version is 14 or above
+- add option `AutoAddLangType`, automatically marks generated types with the C# language version they require
+- add option `DefaultModifier`, sets the default modifier (`internal`/`public`)
+- add option `NotWriteGeneratedCodeAttribute`, does not write `GeneratedCodeAttribute`
 - add
 ```
 System
+    Array
+        MaxLength
     Collections.Generic
-        KeyValuePair
-    Math
-        Tau
-    MathF
-        Tau
+        List
+            EnsureCapacity(int)
+        ReferenceEqualityComparer
+    Diagnostics.CodeAnalysis
+        ConstantExpectedAttribute
+        SetsRequiredMembersAttribute
+        UnscopedRefAttribute
+    IO
+        Stream
+            ReadExactly(Span<byte>)
+            ReadExactly(byte[],int,int)
     Runtime
         CompilerServices
-            RawArrayData
-            RawData
+            CollectionBuilderAttribute
+            IgnoresAccessChecksToAttribute
+            InterceptsLocationAttribute
+            IUnion
+            ModuleInitializerAttribute
+            SkipLocalsInitAttribute
+            UnionAttribute
         InteropServices
-            MemoryMarshal
-                GetArrayDataReference(T[])
-    TimeSpan
-        HoursPerDay
-        MicrosecondsPerDay
-        MicrosecondsPerHour
-        MicrosecondsPerMillisecond
-        MicrosecondsPerMinute
-        MicrosecondsPerSecond
-        MillisecondsPerDay
-        MillisecondsPerHour
-        MillisecondsPerMinute
-        MillisecondsPerSecond
-        MinutesPerDay
-        MinutesPerHour
-        NanosecondsPerTick
-        SecondsPerDay
-        SecondsPerHour
-        SecondsPerMinute
-        TicksPerMicrosecond
+            LibraryImportAttribute
+            StringMarshalling
+    Type
+        IsAssignableTo(Type)
 ```
 - change
 ```
 ;old
-System.Collections.Generic
-    KeyValuePair
-        Deconstruct()
+System
+    Type
+        GetConstructor()
+        GetMethod()
 ;new
-System.Collections.Generic
-    KeyValuePair`2
-        Deconstruct()
+System
+    Type
+        GetConstructor(BindingFlags,Type[])
+        GetMethod(BindingFlags,Type[])
 ```
 ### Bug Fixes
-- ArgumentException occurred during the initial build of a multi-threaded environment
+- the option 'DisableAddDependencies' was invalid
+- Stream `Read()` and `Write()` condition

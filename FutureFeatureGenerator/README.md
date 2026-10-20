@@ -1,4 +1,4 @@
-﻿Create a file named `FutureFeature.txt` in your project directory. If it doesn't take effect, check the file properties and set it to `C# Analyzer Additional Files`.
+Create a file named `FutureFeature.txt` in your project directory. If it doesn't take effect, check the file properties and set it to `C# Analyzer Additional Files`.
 
 File example:
 ```
@@ -41,14 +41,20 @@ FutureArgumentNullException.ThrowIfNull(arg);
 #endif
 ```
 
-There are three configuration items. default is `false`
+There are six configuration items. default is `false`, `UseExtensions` defaults to `true` when the C# language version is 14 or above
 `UseExtensions` adds `extensions()` outside `static` methods.  
 `UseRealCondition` uses actual conditions instead of `#if true`. Below is the enabling syntax. 
 `DisableAddDependencies` disable classes and methods that auto add dependencies
+`AutoAddLangType` automatically marks generated types with the C# language version they require
+`NotWriteGeneratedCodeAttribute` does not write `GeneratedCodeAttribute` to generated code
+`DefaultModifier` sets the default modifier (`internal` by default), the value is `internal` or `public`
 ```
 @UseExtensions true
 @UseRealCondition true
 @DisableAddDependencies true
+@AutoAddLangType true
+@NotWriteGeneratedCodeAttribute true
+@DefaultModifier public
 ```
 
 Example:
@@ -83,8 +89,12 @@ System
         KeyValuePair
         KeyValuePair`2
             Deconstruct()
+        List
+            EnsureCapacity(int)
+        ReferenceEqualityComparer
     Diagnostics.CodeAnalysis
         AllowNullAttribute
+        ConstantExpectedAttribute
         DisallowNullAttribute
         DoesNotReturnAttribute
         DoesNotReturnIfAttribute
@@ -96,11 +106,15 @@ System
         NotNullAttribute
         NotNullIfNotNullAttribute
         NotNullWhenAttribute
+        SetsRequiredMembersAttribute
         StringSyntaxAttribute
+        UnscopedRefAttribute
     IO
         Stream
             ;Read()
             Read(Span<byte>)
+            ReadExactly(Span<byte>)
+            ReadExactly(byte[],int,int)
             ;Write()
             Write(ReadOnlySpan<byte>)
     Reflection
@@ -111,15 +125,24 @@ System
             CallerFilePathAttribute
             CallerLineNumberAttribute
             CallerMemberNameAttribute
+            CollectionBuilderAttribute
             CompilerFeatureRequiredAttribute
+            IgnoresAccessChecksToAttribute
+            InterceptsLocationAttribute
             IsExternalInit
+            IUnion
+            ModuleInitializerAttribute
             OverloadResolutionPriorityAttribute
             RawArrayData
             RawData
             RequiredMemberAttribute
+            SkipLocalsInitAttribute
+            UnionAttribute
         InteropServices
+            LibraryImportAttribute
             MemoryMarshal
                 GetArrayDataReference(T[])
+            StringMarshalling
     ; FutureArgumentException
     ArgumentException
         ThrowIfNullOrEmpty()
@@ -134,6 +157,8 @@ System
         ThrowIfGreaterThanOrEqual()
         ThrowIfLessThan()
         ThrowIfLessThanOrEqual()
+    Array
+        MaxLength
     ArraySegment
         CopyTo(T[])
         CopyTo(T[],int)
@@ -226,6 +251,7 @@ System
         SecondsPerMinute
         TicksPerMicrosecond
     Type
-        GetConstructor()
-        GetMethod()
+        GetConstructor(BindingFlags,Type[])
+        GetMethod(BindingFlags,Type[])
+        IsAssignableTo(Type)
 ```
