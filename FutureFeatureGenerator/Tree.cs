@@ -9,7 +9,8 @@ enum NodeType
 {
     Namespace,
     Class,
-    Method
+    Method,
+    Const
 }
 [DebuggerDisplay("Name={Name} Id={Id}")]
 internal abstract class NodeBase
@@ -252,7 +253,24 @@ internal class NodeClass : HasChildrenNode
             writer.WriteLine(Name.Contains('`') ? Name.Replace('`', '_') : Name);
             writer.WriteLine('{');
             writer.Indent++;
-            var writeMethods = Children.Cast<NodeMethod>();
+            var writeMethods = Children.OfType<NodeMethod>().Where(static x => x.NodeType != NodeType.Const);
+            foreach (var group in Children.OfType<NodeConst>().GroupBy(x => x.GetCondition(options.UseRealCondition), ReferenceEqualityComparer<string>.Instance))
+            {
+                var needWriteIf = !string.IsNullOrWhiteSpace(group.Key);
+                if (needWriteIf)
+                {
+                    writer.Write("#if ");
+                    writer.WriteLine(group.Key);
+                }
+                foreach (var child in group)
+                {
+                    child.Write(writer, options, modifierRecord, nodesNamespace);
+                }
+                if (needWriteIf)
+                {
+                    writer.WriteLine("#endif");
+                }
+            }
             if (options.UseExtensions)
             {
                 var notExtensionMethods = writeMethods.Where(static x => x.IsNotExtension);
@@ -378,5 +396,12 @@ internal class NodeMethod : NodeBase
     public bool IsConditionTrue(bool real, string[] args)
     {
         return CondititonFuncCache[GetCondition(real)](args);
+    }
+}
+internal sealed class NodeConst : NodeMethod
+{
+    public NodeConst(string[] lines, string condition, string name) : base(lines, condition, name)
+    {
+        NodeType = NodeType.Const;
     }
 }

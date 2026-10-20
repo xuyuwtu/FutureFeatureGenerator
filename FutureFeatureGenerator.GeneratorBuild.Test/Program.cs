@@ -15,7 +15,7 @@ internal class Program
                     preprocessorSymbols: ["NETSTANDARD", "NETSTANDARD2_0_OR_GREATER"]);
         var baseCompilation = CSharpCompilation.Create(
             "Test",
-            [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } }", parseOptions)],
+            [CSharpSyntaxTree.ParseText("namespace Test { class TestClass { } } namespace System { class MathF { } }", parseOptions)],
             ReferenceAssemblies.NetStandard.NetStandard20.AddPackages([
                 new PackageIdentity("System.Memory", "4.5.5")
             ]).ResolveAsync(null, default).Result,
@@ -53,9 +53,23 @@ internal class Program
         using var peStream = new MemoryStream();
         var emitResult = emitCompilation.Emit(peStream);
         Debug.Assert(emitResult.Success);
-        foreach (var diagnostic in emitResult.Diagnostics)
+        if (!emitResult.Success)
         {
-            Console.WriteLine(diagnostic);
+            foreach (var tree in runResult.GeneratedTrees)
+            {
+                var lineNum = 1;
+                var text = tree.GetText();
+                foreach (var line in text.Lines)
+                {
+                    Console.Write(lineNum++);
+                    Console.Write(' ');
+                    Console.WriteLine(text.GetSubText(line.Span));
+                }
+            }
+            foreach (var diagnostic in emitResult.Diagnostics)
+            {
+                Console.WriteLine(diagnostic);
+            }
         }
 
         runResult = extensionGeneratorDriver.GetRunResult();
@@ -65,9 +79,23 @@ internal class Program
         peStream.SetLength(0);
         emitResult = emitCompilation.Emit(peStream);
         Debug.Assert(emitResult.Success);
-        foreach (var diagnostic in emitResult.Diagnostics)
+        if (!emitResult.Success)
         {
-            Console.WriteLine(diagnostic);
+            foreach(var tree in runResult.GeneratedTrees)
+            {
+                var lineNum = 1;
+                var text = tree.GetText();
+                foreach (var line in text.Lines)
+                {
+                    Console.Write(lineNum++);
+                    Console.Write(' ');
+                    Console.WriteLine(text.GetSubText(line.Span));
+                }
+            }
+            foreach (var diagnostic in emitResult.Diagnostics)
+            {
+                Console.WriteLine(diagnostic);
+            }
         }
     }
 }

@@ -249,7 +249,7 @@ public class FeatureGenerator :
             NodesNamespace[i] = node.NodeType switch
             {
                 NodeType.Namespace => NodesFullName[i],
-                NodeType.Class or NodeType.Method => NodesNamespace[node.ParentId],
+                NodeType.Class or NodeType.Method or NodeType.Const => NodesNamespace[node.ParentId],
                 _ => throw new InvalidEnumArgumentException($"NodeType: {node.NodeType}")
             };
 
@@ -498,6 +498,7 @@ public class FeatureGenerator :
         var sb = new StringBuilder();
         var sw = new StringWriter(sb);
         var itw = new IndentedTextWriter(sw);
+        itw.WriteLine("#define FFG_USEEXTENSIONS");
         itw.WriteLine("#nullable enable");
         foreach (var additionalNode in additionalNodes)
         {

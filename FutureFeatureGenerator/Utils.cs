@@ -276,6 +276,11 @@ internal static class Utils
         }
         // resolve null warn
         condition ??= "";
+        var isConst = modifierLineIndex >= 0 && lines[modifierLineIndex].StartsWith("const");
+        if (isConst)
+        {
+            return new NodeConst([.. lines], condition, name) { AliasName = aliasName, Dependencies = [.. dependencies], ModifierLineIndex = modifierLineIndex };
+        }
         return new NodeMethod([.. lines], condition, name) { AliasName = aliasName, Dependencies = [.. dependencies], ModifierLineIndex = modifierLineIndex, IsNotExtension = isNotExtension };
     }
     public static TValue? TryGet<TKey, TValue>(this Dictionary<TKey, TValue> self, TKey key) where TValue : class

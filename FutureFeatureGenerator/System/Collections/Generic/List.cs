@@ -17,10 +17,18 @@ internal static partial class FutureList
         if (self.Capacity < capacity)
         {
             int newCapacity = self.Capacity == 0 ? 4 : 2 * self.Capacity;
+#if FFG_USEEXTENSIONS
+            if ((uint)newCapacity > FutureArray.get_MaxLength)
+            {
+
+                newCapacity = FutureArray.get_MaxLength;
+            }
+#else
             if ((uint)newCapacity > FutureArray.MaxLength)
             {
                 newCapacity = FutureArray.MaxLength;
             }
+#endif
             if (newCapacity < capacity)
             {
                 newCapacity = capacity;

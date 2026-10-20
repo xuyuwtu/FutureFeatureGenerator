@@ -95,6 +95,27 @@ public class GeneratorTest
         Assert.DoesNotMatch("internal readonly", text);
     }
     [Fact]
+    public void OptionCheck_UseExtensions_Const()
+    {
+        var driver = Utils.GetGeneratorDriver($"""
+            @UseExtensions true
+            System
+                Math
+                    Tau
+                    Clamp(int,int,int)
+            """, NetStandard20References);
+        var result = driver.GetRunResult();
+        Assert.Single(result.Results);
+        Assert.Single(result.Results[0].GeneratedSources);
+        var text = result.Results[0].GeneratedSources[0].SourceText.ToString();
+        var extensionIndex = text.IndexOf("extension(Math)");
+        var constIndex = text.IndexOf("const double Tau");
+        Assert.True(extensionIndex >= 0);
+        Assert.True(constIndex >= 0);
+        //const成员不能放进extension块，必须写在extension块外的类主体中
+        Assert.True(constIndex < extensionIndex);
+    }
+    [Fact]
     public void TypeCheck_NewMember_Alias()
     {
         var generatedNames = Utils.GetGeneratorTypeFullNames($"""
